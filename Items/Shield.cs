@@ -193,7 +193,7 @@ namespace AF
             {
                 return;
             }
-            enemy.damageReceiver.ApplyDamage(damageDealtToEnemiesUponBlocking);
+            enemy.damageReceiver.ApplyDamage(null, damageDealtToEnemiesUponBlocking);
         }
 
     }

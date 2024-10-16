@@ -154,7 +154,7 @@ namespace AF
                 return;
             }
 
-            enemy.damageReceiver.ApplyDamage(damageDealtToEnemiesUponAttacked);
+            enemy.damageReceiver.ApplyDamage(null, damageDealtToEnemiesUponAttacked);
         }
     }
 }

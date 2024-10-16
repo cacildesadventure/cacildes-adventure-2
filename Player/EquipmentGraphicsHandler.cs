@@ -6,6 +6,7 @@ using AF.Stats;
 using TigerForge;
 using AF.Events;
 using AF.Health;
+using UnityEngine.Localization.Settings;
 
 namespace AF
 {
@@ -467,6 +468,25 @@ namespace AF
         {
             return statsBonusController.weightPenalty;
         }
+
+        public string GetWeightLoadLabel(float givenWeightLoad)
+        {
+            if (IsLightWeightForGivenValue(givenWeightLoad))
+            {
+                return LocalizationSettings.SelectedLocale.Identifier.Code == "en" ? "Light Load" : "Leve";
+            }
+            if (IsMidWeightForGivenValue(givenWeightLoad))
+            {
+                return LocalizationSettings.SelectedLocale.Identifier.Code == "en" ? "Medium Load" : "Médio";
+            }
+            if (IsHeavyWeightForGivenValue(givenWeightLoad))
+            {
+                return LocalizationSettings.SelectedLocale.Identifier.Code == "en" ? "Heavy Load" : "Pesado";
+            }
+
+            return "";
+        }
+
 
         public Damage OnDamageEvent(CharacterBaseManager attacker, CharacterBaseManager receiver, Damage damage)
         {

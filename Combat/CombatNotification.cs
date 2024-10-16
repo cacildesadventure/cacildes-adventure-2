@@ -89,7 +89,7 @@ namespace AF
 
             if (damage.physical > 0)
             {
-                text += $"<color=white>-{damage.physical}</color>";
+                text += $"<color=#DD1A5B>-{damage.physical}</color>";
             }
 
             if (damage.fire > 0)

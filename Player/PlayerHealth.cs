@@ -134,13 +134,6 @@ namespace AF
 
         void HandleDeath()
         {
-            if (gameSession.isParticipatingInArenaEvent)
-            {
-                EventManager.EmitEvent(EventMessages.ON_ARENA_LOST);
-                gameSession.SetIsParticipatingInArenaEvent(false);
-                onDyingInArena?.Invoke();
-                return;
-            }
             onDeath?.Invoke();
         }
 
@@ -206,10 +199,6 @@ namespace AF
         {
             this.playerStatsDatabase.currentHealth = value;
             onHealthChanged?.Invoke();
-        }
-
-        public override void SetMaxHealth(int value)
-        {
         }
 
         public Damage OnDamageEvent(CharacterBaseManager attacker, CharacterBaseManager receiver, Damage damage)

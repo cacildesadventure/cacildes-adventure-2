@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AF.Animations;
 using AF.Health;
@@ -73,8 +74,6 @@ namespace AF
 
         [Header("Attack")]
         public Damage damage;
-        public int heavyAttackBonus;
-        public int heavyAttackPostureDamageBonus;
 
         [Header("Level & Upgrades")]
         public bool canBeUpgraded = true;
@@ -184,13 +183,23 @@ namespace AF
             return this.damage;
         }
 
-        public int GetWeaponAttack()
+        public int GetWeaponBaseAttack()
         {
             return CalculateValue(this.level).physical;
         }
-        public int GetWeaponAttackForLevel(int level)
+        public int GetWeaponAttack(AttackStatManager attackStatManager)
         {
-            return CalculateValue(level).physical;
+            int strengthBonus = (int)attackStatManager.GetStrengthBonusFromWeapon(this);
+            int dexterityBonus = (int)attackStatManager.GetDexterityBonusFromWeapon(this);
+
+            return GetWeaponBaseAttack() + strengthBonus + dexterityBonus;
+        }
+        public int GetWeaponAttackForLevel(AttackStatManager attackStatManager, int level)
+        {
+            int strengthBonus = (int)attackStatManager.GetStrengthBonusFromWeapon(this);
+            int dexterityBonus = (int)attackStatManager.GetDexterityBonusFromWeapon(this);
+
+            return CalculateValue(level).physical + strengthBonus + dexterityBonus;
         }
         public int GetWeaponFireAttack()
         {
@@ -198,15 +207,15 @@ namespace AF
         }
         public int GetWeaponFireAttackForLevel(int level)
         {
-            return CalculateValue(level).fire;
+            return (int)CalculateValue(level).fire;
         }
         public int GetWeaponFrostAttack()
         {
-            return CalculateValue(this.level).frost;
+            return (int)CalculateValue(this.level).frost;
         }
         public int GetWeaponFrostAttackForLevel(int level)
         {
-            return CalculateValue(level).frost;
+            return (int)CalculateValue(level).frost;
         }
         public int GetWeaponLightningAttack(int playerReputation)
         {
@@ -214,33 +223,43 @@ namespace AF
 
             if (isHolyWeapon && playerReputation > 0)
             {
-                lightingDamage += (int)Mathf.Pow(Mathf.Abs(playerReputation), 1.25f);
+                lightingDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
             }
 
-            return lightingDamage;
+            return (int)lightingDamage; ;
         }
+
+        public int GetBaseWeaponLightningAttack()
+        {
+            return CalculateValue(this.level).lightning;
+        }
+
         public int GetWeaponLightningAttackForLevel(int level, int playerReputation)
         {
             int lightingDamage = CalculateValue(level).lightning;
 
             if (isHolyWeapon && playerReputation > 0)
             {
-                lightingDamage += (int)Mathf.Pow(Mathf.Abs(playerReputation), 1.25f);
+                lightingDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
             }
 
-            return lightingDamage;
+            return (int)lightingDamage;
         }
 
+        public int GetBaseWeaponDarknessAttack()
+        {
+            return CalculateValue(this.level).darkness;
+        }
         public int GetWeaponDarknessAttack(int playerReputation)
         {
             int darknessDamage = CalculateValue(this.level).darkness;
 
             if (isHexWeapon && playerReputation < 0)
             {
-                darknessDamage += (int)Mathf.Pow(Mathf.Abs(playerReputation), 1.25f);
+                darknessDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
             }
 
-            return darknessDamage;
+            return (int)darknessDamage;
         }
 
         public int GetWeaponDarknessAttackForLevel(int level, int playerReputation)
@@ -249,30 +268,48 @@ namespace AF
 
             if (isHexWeapon && playerReputation < 0)
             {
-                darknessDamage += (int)Mathf.Pow(Mathf.Abs(playerReputation), 1.25f);
+                darknessDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
             }
 
-            return darknessDamage;
+            return (int)darknessDamage;
         }
 
         public int GetWeaponWaterAttack()
         {
-            return CalculateValue(this.level).water;
+            return (int)CalculateValue(this.level).water;
         }
 
         public int GetWeaponWaterAttackForLevel(int level)
         {
-            return CalculateValue(level).water;
+            return (int)CalculateValue(level).water;
         }
 
-        public int GetWeaponMagicAttack()
+        public int GetWeaponBaseMagicAttack()
         {
-            return CalculateValue(this.level).magic;
+            return (int)CalculateValue(this.level).magic;
+        }
+        public int GetWeaponMagicAttack(AttackStatManager attackStatManager)
+        {
+            int baseMagicDamage = (int)CalculateValue(this.level).magic;
+
+            if (baseMagicDamage > 0)
+            {
+                baseMagicDamage += (int)attackStatManager.GetIntelligenceBonusFromWeapon(this);
+            }
+
+            return baseMagicDamage;
         }
 
-        public int GetWeaponMagicAttackForLevel(int level)
+        public int GetWeaponMagicAttackForLevel(int level, AttackStatManager attackStatManager)
         {
-            return CalculateValue(level).magic;
+            int baseMagicDamage = (int)CalculateValue(level).magic;
+
+            if (baseMagicDamage > 0)
+            {
+                baseMagicDamage += (int)attackStatManager.GetIntelligenceBonusFromWeapon(this);
+            }
+
+            return baseMagicDamage;
         }
 
         public Damage GetWeaponDamage()
@@ -288,7 +325,7 @@ namespace AF
             {
                 if (statusEffect != null)
                 {
-                    result += $"+{statusEffect.amountPerHit} {statusEffect.statusEffect.GetName()} {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Inflicted per Hit")}\n";
+                    result += $"+{statusEffect.amountPerHit} {statusEffect.statusEffect.GetName()} {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Inflicted per Hit")}\n";
                 }
             }
 
@@ -305,10 +342,10 @@ namespace AF
             if (CanBeUpgradedFurther() && weaponUpgrades[this.level - 1] != null && weaponUpgrades[this.level - 1].upgradeMaterials != null)
             {
                 WeaponUpgradeLevel nextWeaponUpgradeLevel = weaponUpgrades[this.level - 1];
-                string text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Next Weapon Level: ")}{this.level + 1}\n";
+                string text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Next Weapon Level: ")}{this.level + 1}\n";
 
-                text += $"{LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Required Gold:")} {nextWeaponUpgradeLevel.goldCostForUpgrade} {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Coins")}\n";
-                text += $"{LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Required Items:")} \n";
+                text += $"{LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Required Gold:")} {nextWeaponUpgradeLevel.goldCostForUpgrade} {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Coins")}\n";
+                text += $"{LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Required Items:")} \n";
 
                 foreach (var upgradeMat in weaponUpgrades[this.level - 1].upgradeMaterials)
                 {
@@ -363,29 +400,29 @@ namespace AF
         public string DrawRequirements(StatsBonusController statsBonusController)
         {
             string text = AreRequirementsMet(statsBonusController)
-                ? LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Requirements met: ")
-                : LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Requirements not met: ");
+                ? LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Requirements met: ")
+                : LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Requirements not met: ");
 
             if (strengthRequired != 0)
             {
-                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Strength Required:")} {strengthRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Current:")} {statsBonusController.GetCurrentStrength()}\n";
+                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Strength Required:")} {strengthRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Current:")} {statsBonusController.GetCurrentStrength()}\n";
             }
             if (dexterityRequired != 0)
             {
-                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Dexterity Required:")} {dexterityRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Current:")} {statsBonusController.GetCurrentDexterity()}\n";
+                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Dexterity Required:")} {dexterityRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Current:")} {statsBonusController.GetCurrentDexterity()}\n";
             }
             if (intelligenceRequired != 0)
             {
-                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Intelligence Required:")} {intelligenceRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Current:")} {statsBonusController.GetCurrentIntelligence()}\n";
+                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Intelligence Required:")} {intelligenceRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Current:")} {statsBonusController.GetCurrentIntelligence()}\n";
             }
             if (positiveReputationRequired != 0)
             {
-                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Reputation Required:")} {intelligenceRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Current:")} {statsBonusController.GetCurrentReputation()}\n";
+                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Reputation Required:")} {intelligenceRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Current:")} {statsBonusController.GetCurrentReputation()}\n";
             }
 
             if (negativeReputationRequired != 0)
             {
-                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Reputation Required:")} -{negativeReputationRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Current:")} {statsBonusController.GetCurrentReputation()}\n";
+                text += $"  {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Reputation Required:")} -{negativeReputationRequired}   {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Current:")} {statsBonusController.GetCurrentReputation()}\n";
             }
 
             return text.TrimEnd();

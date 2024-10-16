@@ -143,7 +143,7 @@ namespace AF
 
             if (other.TryGetComponent<DamageReceiver>(out var damageReceiver))
             {
-                damageReceiver.ApplyDamage(new Damage(
+                damageReceiver.ApplyDamage(this, new Damage(
                     physical: 1,
                     fire: 0,
                     frost: 0,

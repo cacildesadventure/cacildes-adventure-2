@@ -30,10 +30,7 @@ namespace AF
                 return;
             }
 
-            HandleIncomingDamage(attacker, (incomingDamage) =>
-            {
-                onDamageInflicted();
-            }, character != null ? character.isConfused : false);
+            HandleIncomingDamage(attacker);
         }
 
         public void ResetStates()
@@ -41,38 +38,41 @@ namespace AF
             canTakeDamage = true;
         }
 
-        public void HandleIncomingDamage(CharacterBaseManager attacker, UnityAction<Damage> onTakeDamage, bool ignoreSameFaction)
+        public bool HandleIncomingDamage(CharacterBaseManager attacker)
         {
-            if (IsSameFactionAttack(attacker, ignoreSameFaction) || !CanTakeDamage())
+            if (!CanTakeDamage(attacker))
             {
-                return;
+                return false;
             }
 
             Damage incomingDamage = attacker.GetAttackDamage();
 
+            return ApplyDamage(attacker, incomingDamage);
+        }
+
+        public bool ApplyDamage(CharacterBaseManager attacker, Damage damage)
+        {
             // Call subscribers to modify incomingDamage
             if (onDamageEvent != null)
             {
-                incomingDamage = onDamageEvent(attacker, character, incomingDamage); // Get modified damage
+                foreach (var subscriber in onDamageEvent.GetInvocationList())
+                {
+                    var modifiedDamage = (Damage)subscriber.DynamicInvoke(attacker, character, damage);
+
+                    if (modifiedDamage == null)
+                    {
+                        damage = null;
+                    }
+
+                    damage = modifiedDamage;
+                }
             }
 
-            if (incomingDamage == null)
+            if (damage == null)
             {
-                return;
+                return false;
             }
 
-            ApplyDamage(incomingDamage);
-
-            onTakeDamage?.Invoke(incomingDamage);
-        }
-
-        private bool IsSameFactionAttack(CharacterBaseManager damageOwner, bool ignoreSameFaction)
-        {
-            return !ignoreSameFaction && damageOwner.IsFromSameFaction(character);
-        }
-
-        public void ApplyDamage(Damage damage)
-        {
             character.health.TakeDamage(damage.GetTotalDamage());
 
             if (character.statusController != null && damage.statusEffects != null && damage.statusEffects.Length > 0)
@@ -84,6 +84,8 @@ namespace AF
             }
 
             HandleDamageEffect(damage);
+
+            return true;
         }
 
         void HandleDamageEffect(Damage damage)
@@ -99,6 +101,7 @@ namespace AF
             int damageAmount = (int)damagePercentage * character.health.GetMaxHealth() / 100;
 
             ApplyDamage(
+                null,
                 new(
                     physical: damageAmount,
                     fire: 0,
@@ -116,8 +119,9 @@ namespace AF
                     ignoreBlocking: false));
         }
 
-        bool CanTakeDamage()
+        bool CanTakeDamage(CharacterBaseManager attacker)
         {
+
             if (!canTakeDamage)
             {
                 return false;
@@ -127,6 +131,11 @@ namespace AF
             if (character == null)
             {
                 return true;
+            }
+
+            if (attacker.IsFromSameFaction(character))
+            {
+                return false;
             }
 
             if (character.health.GetCurrentHealth() <= 0)

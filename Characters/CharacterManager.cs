@@ -1,22 +1,20 @@
-﻿using AF.Animations;
-using AF.Combat;
-using AF.Equipment;
-using AF.Events;
-using AF.Health;
-using AF.Shooting;
-using TigerForge;
-using UnityEngine;
-using UnityEngine.Events;
-using AF.Companions;
-using UnityEngine.AI;
-using System.Collections.Generic;
-using System;
-
-
+﻿
 namespace AF
 {
+    using AF.Animations;
+    using AF.Combat;
+    using AF.Equipment;
+    using AF.Events;
+    using AF.Health;
+    using AF.Shooting;
+    using TigerForge;
+    using UnityEngine;
+    using UnityEngine.Events;
+    using AF.Companions;
+    using UnityEngine.AI;
     public class CharacterManager : CharacterBaseManager
     {
+        public Combatant combatant;
         public CompanionID companionID;
         public CharacterCombatController characterCombatController;
         public TargetManager targetManager;
@@ -26,6 +24,10 @@ namespace AF
         public CharacterBossController characterBossController;
         public ExecutionManager executionManager;
         public CharacterBackstabController characterBackstabController;
+        public StateManager stateManager;
+        public CharacterLoot characterLoot;
+        public LockOnRef characterLockOnRef;
+        public CharacterHUD characterHUD;
 
         // Animator Overrides
         [HideInInspector] public AnimatorOverrideController animatorOverrideController;
@@ -107,6 +109,8 @@ namespace AF
             characterPoise.ResetStates();
 
             executionManager.ResetStates();
+
+            characterBackstabController.ResetStates();
         }
 
         public void UpdateAnimatorOverrideControllerClips(string animationName, AnimationClip animationClip)
@@ -318,9 +322,30 @@ namespace AF
                    !float.IsNaN(position.x) && !float.IsNaN(position.y) && !float.IsNaN(position.z);
         }
 
-        internal IEnumerable<CharacterManager> Where(Func<object, object> value)
+        public void EnableComponents()
         {
-            throw new NotImplementedException();
+            stateManager.enabled = true;
+            characterHUD.gameObject.SetActive(true);
+            agent.enabled = true;
+            HandleCollisions(true);
+        }
+
+        public void DisableComponents()
+        {
+            stateManager.enabled = false;
+            characterHUD.gameObject.SetActive(false);
+            agent.enabled = false;
+            HandleCollisions(false);
+        }
+
+        void HandleCollisions(bool activate)
+        {
+            characterController.enabled = activate;
+
+            if (characterLockOnRef.TryGetComponent<SphereCollider>(out var sphereCollider))
+            {
+                sphereCollider.enabled = activate;
+            }
         }
     }
 }

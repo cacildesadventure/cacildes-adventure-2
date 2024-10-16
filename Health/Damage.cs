@@ -117,7 +117,7 @@ namespace AF.Health
 
             if (this.magic > 0)
             {
-                this.magic += (int)(currentWeapon.GetWeaponMagicAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.magic += (int)(currentWeapon.GetWeaponMagicAttack(attackStatManager) + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
             }
 
             if (this.lightning > 0)
@@ -184,7 +184,7 @@ namespace AF.Health
         public void ScaleProjectile(AttackStatManager attackStatManager, Weapon currentWeapon)
         {
             // Steel arrow might inherit magic from a magical bow, hence don't check if base values are greater than zero
-            this.physical += (int)(currentWeapon.GetWeaponAttack() + attackStatManager.GetDexterityBonusFromWeapon(currentWeapon));
+            this.physical += (int)(currentWeapon.GetWeaponAttack(attackStatManager) + attackStatManager.GetDexterityBonusFromWeapon(currentWeapon));
 
             if (attackStatManager.playerManager.statsBonusController.projectileMultiplierBonus > 0f)
             {
@@ -193,7 +193,7 @@ namespace AF.Health
 
             this.fire += (int)currentWeapon.GetWeaponFireAttack();
             this.frost += (int)currentWeapon.GetWeaponFrostAttack();
-            this.magic += (int)(currentWeapon.GetWeaponMagicAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon));
+            this.magic += (int)(currentWeapon.GetWeaponMagicAttack(attackStatManager) + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon));
             this.lightning += (int)currentWeapon.GetWeaponLightningAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation());
             this.darkness += (int)currentWeapon.GetWeaponDarknessAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation());
             this.water += (int)currentWeapon.GetWeaponWaterAttack();

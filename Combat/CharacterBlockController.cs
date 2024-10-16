@@ -44,6 +44,15 @@ namespace AF
                 return incomingDamage;
             }
 
+
+            if (CanParry(incomingDamage))
+            {
+                (characterManager as CharacterManager)?.FaceTarget();
+                HandleParryEvent();
+                attacker.characterBlockController.HandleParriedEvent(GetPostureDamageFromParry());
+                return null;
+            }
+
             characterManager.characterBlockController.BlockAttack(incomingDamage);
             return null;
         }

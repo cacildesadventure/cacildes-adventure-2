@@ -80,7 +80,7 @@ namespace AF
                     damage.water *= 2;
                 }
 
-                damageReceiver.ApplyDamage(damage);
+                damageReceiver.ApplyDamage(null, damage);
 
                 if (damageOwner != null && damageReceiver.character is CharacterManager aiCharacter && aiCharacter.targetManager != null)
                 {

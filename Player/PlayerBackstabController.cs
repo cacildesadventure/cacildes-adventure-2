@@ -35,11 +35,10 @@ namespace AF
                 enemy.characterPosture.isStunned = true;
                 enemy.characterBackstabController.waitingForBackstab = true;
 
-                bool isBackstabbing = false;
-                // If backstab sucess
-                enemy.damageReceiver.HandleIncomingDamage(playerManager, (incomeDamage) =>
+                bool isBackstabbing = enemy.damageReceiver.HandleIncomingDamage(playerManager);
+
+                if (isBackstabbing)
                 {
-                    isBackstabbing = true;
                     enemy.transform.position = playerManager.transform.position;
                     playerManager.transform.rotation = enemy.transform.rotation;
                     playerManager.playerComponentManager.DisablePlayerControlAndRegainControlAfterResetStates();
@@ -49,7 +48,7 @@ namespace AF
                     Invoke(nameof(PlayDelayedBackstab), 0.8f);
 
                     DisableBackstab();
-                }, false);
+                }
 
                 return isBackstabbing;
             }
@@ -107,12 +106,17 @@ namespace AF
                 return false;
             }
 
-            if (!target.characterBackstabController.canBeBackstabbed)
+            if (!target.characterBackstabController.CanBeBackstabbed())
             {
                 return false;
             }
 
             if (target.characterPosture.isStunned)
+            {
+                return false;
+            }
+
+            if (target.characterBackstabController.isBeingBackstabbed)
             {
                 return false;
             }

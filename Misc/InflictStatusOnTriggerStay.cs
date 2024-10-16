@@ -24,12 +24,12 @@ namespace AF
                         return;
                     }
 
-                    playerManager.damageReceiver.ApplyDamage(newDamage);
+                    playerManager.damageReceiver.ApplyDamage(null, newDamage);
 
                 }
                 else if (detectEnemies && other.TryGetComponent(out CharacterManager characterManager))
                 {
-                    characterManager.damageReceiver.ApplyDamage(newDamage);
+                    characterManager.damageReceiver.ApplyDamage(null, newDamage);
                 }
             }
         }

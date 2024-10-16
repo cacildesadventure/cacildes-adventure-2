@@ -64,6 +64,13 @@ namespace AF
                 return incomingDamage;
             }
 
+            if (CanParry(incomingDamage))
+            {
+                HandleParryEvent();
+                attacker.characterBlockController.HandleParriedEvent(GetPostureDamageFromParry());
+                return null;
+            }
+
             if (playerManager.staminaStatManager.HasEnoughStaminaForAction(playerManager.playerWeaponsManager.GetCurrentBlockStaminaCost()))
             {
                 incomingDamage = HandleShieldBlock(incomingDamage, attacker);

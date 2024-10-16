@@ -122,7 +122,7 @@ namespace AF
                 damage.ScaleDamageForNewGamePlus(enemy.gameSession);
             }
 
-            damageReceiver.ApplyDamage(damage);
+            damageReceiver.ApplyDamage(shooter, damage);
 
             if (shooter != null
                 && damageReceiver?.character is CharacterManager characterManager

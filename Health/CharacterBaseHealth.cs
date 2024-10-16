@@ -7,6 +7,7 @@ namespace AF.Health
 {
     public abstract class CharacterBaseHealth : MonoBehaviour
     {
+        public readonly string hashDeath = "Dying";
 
         [Header("Events")]
         public UnityEvent onStart;
@@ -53,7 +54,6 @@ namespace AF.Health
         public abstract void SetCurrentHealth(float value);
 
         public abstract int GetMaxHealth();
-        public abstract void SetMaxHealth(int value);
 
         public void PlayPostureHit()
         {

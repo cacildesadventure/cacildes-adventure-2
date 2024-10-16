@@ -109,12 +109,12 @@ namespace AF
                     physical: GetWeaponAttack(weapon) + rageBonus,
                     fire: (int)weapon.GetWeaponFireAttack(),
                     frost: (int)weapon.GetWeaponFrostAttack(),
-                    magic: (int)weapon.GetWeaponMagicAttack(),
+                    magic: (int)weapon.GetWeaponMagicAttack(this),
                     lightning: (int)weapon.GetWeaponLightningAttack(playerManager.playerStatsDatabase.GetCurrentReputation()),
                     darkness: (int)weapon.GetWeaponDarknessAttack(playerManager.playerStatsDatabase.GetCurrentReputation()),
                     water: (int)weapon.GetWeaponWaterAttack(),
                     postureDamage: (IsHeavyAttacking() || IsJumpAttacking())
-                    ? weapon.damage.postureDamage + weapon.heavyAttackPostureDamageBonus
+                    ? weapon.damage.postureDamage
                     : weapon.damage.postureDamage,
                     poiseDamage: weapon.damage.poiseDamage,
                     weaponAttackType: weapon.damage.weaponAttackType,
@@ -250,7 +250,7 @@ namespace AF
 
             var value = (int)(
                 baseValue + weapon.damage.physical <= 0 ? 0 : (
-                +weapon.GetWeaponAttack()
+                +weapon.GetWeaponAttack(this)
                 + GetStrengthBonusFromWeapon(weapon)
                 + GetDexterityBonusFromWeapon(weapon)
                 + GetIntelligenceBonusFromWeapon(weapon))
@@ -263,7 +263,7 @@ namespace AF
 
             if (playerManager.playerCombatController.isHeavyAttacking)
             {
-                int heavyAttackBonus = weapon.heavyAttackBonus;
+                int heavyAttackBonus = 0;
                 value += heavyAttackBonus;
             }
 

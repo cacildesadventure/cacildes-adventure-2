@@ -1,12 +1,11 @@
-using AF.Events;
-using TigerForge;
-
 namespace AF
 {
+    using AF.Events;
+    using TigerForge;
+
     public class CharacterPosture : CharacterAbstractPosture
     {
-        public int maxPostureDamage = 100;
-        int defaultMaxPostureDamage;
+        int curentMaxPosture = 100;
 
         public GameSession gameSession;
 
@@ -14,14 +13,14 @@ namespace AF
         {
             characterBaseManager.damageReceiver.onDamageEvent += OnDamageEvent;
 
-            defaultMaxPostureDamage = maxPostureDamage;
+            curentMaxPosture = GetCombatantBasePosture();
         }
 
         private void Start()
         {
             EventManager.StartListening(EventMessages.ON_LEAVING_BONFIRE, () =>
             {
-                maxPostureDamage = defaultMaxPostureDamage;
+                curentMaxPosture = GetCombatantBasePosture();
             });
         }
 
@@ -32,7 +31,7 @@ namespace AF
 
         public override int GetMaxPostureDamage()
         {
-            return Utils.ScaleWithCurrentNewGameIteration(maxPostureDamage, gameSession.currentGameIteration, gameSession.newGamePlusScalingFactor);
+            return Utils.ScaleWithCurrentNewGameIteration(curentMaxPosture, gameSession.currentGameIteration, gameSession.newGamePlusScalingFactor);
         }
 
         public override float GetPostureDecreateRate()
@@ -51,10 +50,16 @@ namespace AF
             // If taking posture damage, increase the max posture
             if (hasBrokenPosture)
             {
-                maxPostureDamage += (int)(maxPostureDamage / 2);
+                curentMaxPosture += (int)(curentMaxPosture / 2);
             }
 
             return hasBrokenPosture;
+        }
+
+
+        int GetCombatantBasePosture()
+        {
+            return (characterBaseManager as CharacterManager)?.combatant?.posture ?? 1;
         }
     }
 }

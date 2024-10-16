@@ -1,11 +1,11 @@
-using System;
-using UnityEngine;
-using UnityEngine.Localization;
-using UnityEngine.Localization.Settings;
-using UnityEngine.UIElements;
-
-namespace AF.UI.EquipmentMenu
+namespace AF
 {
+    using System;
+    using UnityEngine;
+    using UnityEngine.Localization;
+    using UnityEngine.Localization.Settings;
+    using UnityEngine.UIElements;
+
     public class ItemTooltip : MonoBehaviour
     {
         public PlayerManager playerManager;
@@ -472,14 +472,14 @@ namespace AF.UI.EquipmentMenu
                         + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
             }
 
-            if (weapon.GetWeaponMagicAttack() > 0)
+            if (weapon.GetWeaponMagicAttack(attackStatManager) > 0)
             {
                 CreateTooltip(
                 magicSprite,
                 magic,
                 String.Format(
                     magicAttackLabel.GetLocalizedString(),
-                    weapon.GetWeaponMagicAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
+                    weapon.GetWeaponMagicAttack(attackStatManager) + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
             }
 
             if (weapon.GetWeaponDarknessAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation()) > 0)
@@ -521,12 +521,12 @@ namespace AF.UI.EquipmentMenu
                     postureDamageLabel.GetLocalizedString(), weapon.damage.postureDamage));
             }
 
-            if (weapon.heavyAttackBonus > 0)
-            {
-                CreateTooltip(heavyAttackSprite, Color.white,
-                String.Format(
-                    heavyAttackBonusLabel.GetLocalizedString(), weapon.heavyAttackBonus));
-            }
+            /*            if (weapon.heavyAttackBonus > 0)
+                        {
+                            CreateTooltip(heavyAttackSprite, Color.white,
+                            String.Format(
+                                heavyAttackBonusLabel.GetLocalizedString(), weapon.heavyAttackBonus));
+                        }*/
 
             CreateTooltip(
                 staminaCostSprite,

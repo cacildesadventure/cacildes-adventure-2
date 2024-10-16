@@ -128,6 +128,11 @@ namespace AF
 
         public void RecoverFromStunned()
         {
+            if (characterBaseManager is CharacterManager character && character.characterBackstabController.isBeingBackstabbed)
+            {
+                return;
+            }
+
             isStunned = false;
             onDamageWhileStunned?.Invoke();
         }
@@ -139,6 +144,7 @@ namespace AF
             if (isStunned)
             {
                 RecoverFromStunned();
+                return incomingDamage;
             }
 
             if (incomingDamage == null)

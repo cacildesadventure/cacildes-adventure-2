@@ -33,7 +33,7 @@ namespace AF
 
             if (damage != null)
             {
-                damageReceiver.ApplyDamage(damage);
+                damageReceiver.ApplyDamage(null, damage);
             }
         }
 

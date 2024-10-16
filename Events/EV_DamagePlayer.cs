@@ -12,7 +12,7 @@ namespace AF
 
         public override IEnumerator Dispatch()
         {
-            GetPlayerManager().damageReceiver.ApplyDamage(damage);
+            GetPlayerManager().damageReceiver.ApplyDamage(null, damage);
 
             yield return null;
         }

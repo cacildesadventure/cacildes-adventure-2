@@ -44,6 +44,7 @@ namespace AF
     {
         [Header("Inventory")]
         public SerializedDictionary<Item, ItemAmount> ownedItems = new();
+        public bool loadAllItems = false;
 
 
         [Header("Equipped Items")]
@@ -111,6 +112,16 @@ namespace AF
 
         void LoadInventory()
         {
+            if (loadAllItems)
+            {
+                Item[] items = Resources.LoadAll<Item>("Items");
+                foreach (var item in items)
+                {
+                    inventoryDatabase.AddItem(item);
+                }
+                return;
+            }
+
             foreach (var ownedItem in ownedItems)
             {
                 inventoryDatabase.AddItem(ownedItem.Key, ownedItem.Value.amount);

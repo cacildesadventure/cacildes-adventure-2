@@ -157,21 +157,5 @@ namespace AF
         public abstract int GetPostureDamageFromParry();
 
 
-        public Damage TryHandleParry(CharacterBaseManager damageOwner, Damage incomingDamage)
-        {
-            if (incomingDamage == null)
-            {
-                return incomingDamage;
-            }
-
-            if (CanParry(incomingDamage))
-            {
-                (characterManager as CharacterManager)?.FaceTarget();
-                HandleParryEvent();
-                damageOwner.characterBlockController.HandleParriedEvent(GetPostureDamageFromParry());
-                return null;
-            }
-            return incomingDamage;
-        }
     }
 }

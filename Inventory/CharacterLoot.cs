@@ -1,22 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using AF.Inventory;
-using AYellowpaper.SerializedCollections;
-using UnityEngine;
-using UnityEngine.Localization;
 
 namespace AF
 {
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using AF.Inventory;
+    using AYellowpaper.SerializedCollections;
+    using UnityEngine;
+    using UnityEngine.Localization;
+
     public class CharacterLoot : MonoBehaviour
     {
-
-        [Header("Loot and Experience")]
-
+        [Header("Loot")]
         [SerializedDictionary("Item", "Chance To Get")]
         public SerializedDictionary<Item, LootItemAmount> lootTable;
+        public Combatant.InheritOption inheritOption = Combatant.InheritOption.INHERIT;
 
-        public int baseGold = 100;
+        [Header("Experience")]
         public int bonusGold = 0;
 
         [Header("Components")]
@@ -25,45 +25,27 @@ namespace AF
         // Scene References
         private PlayerManager playerManager;
         private NotificationManager notificationManager;
-
         private Soundbank soundbank;
-
         private UIDocumentPlayerGold uIDocumentPlayerGold;
         private UIDocumentReceivedItemPrompt uIDocumentReceivedItemPrompt;
 
         [Header("Localization")]
-        // "Found: "
-        public LocalizedString found;
-
+        public LocalizedString found; // "Found: "
 
         public void GiveLoot()
         {
             StartCoroutine(GiveLoot_Coroutine());
         }
 
-        public IEnumerator GiveLoot_Coroutine()
+        private IEnumerator GiveLoot_Coroutine()
         {
-            int goldToReceive = baseGold + bonusGold;
+            int goldToReceive = lootOwner.combatant.gold + bonusGold;
 
             yield return new WaitForSeconds(1f);
 
-            if (GetPlayerManager().statsBonusController != null)
-            {
-                var additionalCoinPercentage = GetPlayerManager().statsBonusController.additionalCoinPercentage;
+            goldToReceive = CalculateGoldToReceive(goldToReceive);
 
-                if (additionalCoinPercentage != 0)
-                {
-                    var additionalCoin = (int)Mathf.Ceil(goldToReceive * additionalCoinPercentage / 100);
-
-                    goldToReceive += additionalCoin;
-                }
-
-                if (GetPlayerManager().statsBonusController.ShouldDoubleCoinFromFallenEnemy())
-                {
-                    goldToReceive *= 2;
-                }
-            }
-
+            // Handle Loot
             GetLoot();
 
             yield return new WaitForSeconds(0.2f);
@@ -71,70 +53,140 @@ namespace AF
             GetUIDocumentPlayerGold().AddGold(goldToReceive);
         }
 
+        private int CalculateGoldToReceive(int goldToReceive)
+        {
+            if (GetPlayerManager().statsBonusController != null)
+            {
+                var statsBonus = GetPlayerManager().statsBonusController;
+                var additionalCoinPercentage = statsBonus.additionalCoinPercentage;
+
+                if (additionalCoinPercentage != 0)
+                {
+                    goldToReceive += (int)Mathf.Ceil(goldToReceive * additionalCoinPercentage / 100);
+                }
+
+                if (statsBonus.ShouldDoubleCoinFromFallenEnemy())
+                {
+                    goldToReceive *= 2;
+                }
+            }
+
+            return goldToReceive;
+        }
+
         private void GetLoot()
         {
             var itemsToReceive = new SerializedDictionary<Item, ItemAmount>();
-
             bool hasPlayedFanfare = false;
 
-            foreach (var dropCurrency in lootTable)
+            var finalLootTable = GetFinalLootTable();
+
+            foreach (var dropEntry in finalLootTable)
             {
-                if (dropCurrency.Value.ignoreIfPlayerOwns && playerManager.playerInventory.inventoryDatabase.HasItem(dropCurrency.Key))
-                {
-                    continue;
-                }
+                if (ShouldSkipItem(dropEntry)) continue;
 
-                if (dropCurrency.Key is Card card
-                    && playerManager.playerInventory.inventoryDatabase.GetItemAmount(dropCurrency.Key) >= card.maximumCardsAllowedInInventory)
+                if (Random.Range(0, 100f) <= dropEntry.Value.chanceToGet)
                 {
-                    continue;
-                }
-
-                float calc_dropChance = Random.Range(0, 100f);
-
-                if (calc_dropChance <= dropCurrency.Value.chanceToGet)
-                {
-                    if (hasPlayedFanfare == false)
+                    if (!hasPlayedFanfare)
                     {
                         GetSoundbank().PlaySound(GetSoundbank().uiItemReceived);
                         hasPlayedFanfare = true;
                     }
 
-                    itemsToReceive.Add(dropCurrency.Key, dropCurrency.Value);
+                    itemsToReceive.Add(dropEntry.Key, dropEntry.Value);
                 }
             }
 
+            HandleLootReceived(itemsToReceive);
+        }
+
+        private bool ShouldSkipItem(KeyValuePair<Item, LootItemAmount> dropEntry)
+        {
+            if (dropEntry.Value.ignoreIfPlayerOwns && playerManager.playerInventory.inventoryDatabase.HasItem(dropEntry.Key))
+            {
+                return true;
+            }
+
+            if (dropEntry.Key is Card card &&
+                playerManager.playerInventory.inventoryDatabase.GetItemAmount(dropEntry.Key) >= card.maximumCardsAllowedInInventory)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private SerializedDictionary<Item, LootItemAmount> GetFinalLootTable()
+        {
+            var finalLootTable = new SerializedDictionary<Item, LootItemAmount>();
+
+            switch (inheritOption)
+            {
+                case Combatant.InheritOption.INHERIT:
+                    finalLootTable = lootOwner?.characterLoot?.lootTable ?? lootTable;
+                    break;
+
+                case Combatant.InheritOption.OVERRIDE:
+                    finalLootTable = lootTable;
+                    break;
+
+                case Combatant.InheritOption.MERGE:
+                    // Merge the current class loot table with the inherited one from the loot owner
+                    if (lootOwner?.characterLoot != null)
+                    {
+                        finalLootTable = MergeLootTables(lootOwner.characterLoot.lootTable, lootTable);
+                    }
+                    else
+                    {
+                        finalLootTable = lootTable;
+                    }
+                    break;
+            }
+
+            return finalLootTable;
+        }
+
+        private SerializedDictionary<Item, LootItemAmount> MergeLootTables(SerializedDictionary<Item, LootItemAmount> ownerTable, SerializedDictionary<Item, LootItemAmount> classTable)
+        {
+            var mergedLootTable = new SerializedDictionary<Item, LootItemAmount>(ownerTable);
+
+            foreach (var entry in classTable)
+            {
+                if (mergedLootTable.ContainsKey(entry.Key))
+                {
+                    // Optionally, combine the amounts or chances if the same item exists in both
+                    mergedLootTable[entry.Key].chanceToGet = Mathf.Max(mergedLootTable[entry.Key].chanceToGet, entry.Value.chanceToGet);
+                    mergedLootTable[entry.Key].amount += entry.Value.amount;
+                }
+                else
+                {
+                    mergedLootTable.Add(entry.Key, entry.Value);
+                }
+            }
+
+            return mergedLootTable;
+        }
+
+        private void HandleLootReceived(SerializedDictionary<Item, ItemAmount> itemsToReceive)
+        {
             bool isBoss = lootOwner.characterBossController.IsBoss();
 
-            List<UIDocumentReceivedItemPrompt.ItemsReceived> itemsToDisplay = new();
-            List<UIDocumentReceivedItemPrompt.ItemsReceived> cardsToDisplay = new();
+            var itemsToDisplay = new List<UIDocumentReceivedItemPrompt.ItemsReceived>();
 
             foreach (var item in itemsToReceive)
             {
                 GetPlayerManager().playerInventory.AddItem(item.Key, item.Value.amount);
 
-                bool isCard = item.Key is Card;
+                var receivedItem = new UIDocumentReceivedItemPrompt.ItemsReceived
+                {
+                    itemName = item.Key.nameLocalized.GetLocalizedString(),
+                    quantity = item.Value.amount,
+                    sprite = item.Key.sprite,
+                };
 
-                if (isCard)
+                if (isBoss && GetUIDocumentReceivedItemPrompt() != null)
                 {
-                    cardsToDisplay.Add(new()
-                    {
-                        itemName = item.Key.nameLocalized.GetLocalizedString(),
-                        quantity = item.Value.amount,
-                        sprite = item.Key.sprite,
-                        isCard = true
-                    });
-                }
-                else if (isBoss && GetUIDocumentReceivedItemPrompt() != null)
-                {
-                    itemsToDisplay
-                        .Add(new()
-                        {
-                            itemName = item.Key.GetName(),
-                            quantity = 1,
-                            sprite = item.Key.sprite,
-                            isCard = isCard
-                        });
+                    itemsToDisplay.Add(receivedItem);
                 }
                 else
                 {
@@ -145,94 +197,34 @@ namespace AF
             if (isBoss && itemsToDisplay.Count > 0)
             {
                 GetUIDocumentReceivedItemPrompt().gameObject.SetActive(true);
-                var combinedList = new List<UIDocumentReceivedItemPrompt.ItemsReceived>();
-                combinedList.AddRange(itemsToDisplay);
-                combinedList.AddRange(cardsToDisplay);
-                GetUIDocumentReceivedItemPrompt().DisplayItemsReceived(combinedList);
-            }
-            else if (cardsToDisplay.Count > 0)
-            {
-                StartCoroutine(DisplayCardsWithDelay(cardsToDisplay));
-            }
-
-        }
-
-        IEnumerator DisplayCardsWithDelay(List<UIDocumentReceivedItemPrompt.ItemsReceived> cardsToDisplay)
-        {
-            yield return new WaitForSeconds(0.5f);
-            ShowCards(cardsToDisplay);
-        }
-
-        void ShowCards(List<UIDocumentReceivedItemPrompt.ItemsReceived> cardsToDisplay)
-        {
-            if (cardsToDisplay.Count <= 0)
-            {
-                return;
-            }
-
-            // If an enemy is actively fighting, dont show card
-            if (Utils.HasEnemyFighting())
-            {
-                cardsToDisplay.ForEach(card =>
-                {
-                    GetNotificationManager().ShowNotification(found.GetLocalizedString() + " " + card.itemName, card.sprite);
-                });
-            }
-            else
-            {
-                GetUIDocumentReceivedItemPrompt().gameObject.SetActive(true);
-                GetUIDocumentReceivedItemPrompt().DisplayItemsReceived(cardsToDisplay);
+                GetUIDocumentReceivedItemPrompt().DisplayItemsReceived(itemsToDisplay);
             }
         }
 
-        PlayerManager GetPlayerManager()
+        // Lazy initialization helper methods
+        private PlayerManager GetPlayerManager()
         {
-            if (playerManager == null)
-            {
-                playerManager = FindAnyObjectByType<PlayerManager>(FindObjectsInactive.Include);
-            }
-
-            return playerManager;
+            return playerManager ??= FindAnyObjectByType<PlayerManager>(FindObjectsInactive.Include);
         }
 
-        Soundbank GetSoundbank()
+        private Soundbank GetSoundbank()
         {
-            if (soundbank == null)
-            {
-                soundbank = FindAnyObjectByType<Soundbank>(FindObjectsInactive.Include);
-            }
-
-            return soundbank;
+            return soundbank ??= FindAnyObjectByType<Soundbank>(FindObjectsInactive.Include);
         }
 
-        NotificationManager GetNotificationManager()
+        private NotificationManager GetNotificationManager()
         {
-            if (notificationManager == null)
-            {
-                notificationManager = FindAnyObjectByType<NotificationManager>(FindObjectsInactive.Include);
-            }
-
-            return notificationManager;
+            return notificationManager ??= FindAnyObjectByType<NotificationManager>(FindObjectsInactive.Include);
         }
 
-        UIDocumentPlayerGold GetUIDocumentPlayerGold()
+        private UIDocumentPlayerGold GetUIDocumentPlayerGold()
         {
-            if (uIDocumentPlayerGold == null)
-            {
-                uIDocumentPlayerGold = FindAnyObjectByType<UIDocumentPlayerGold>(FindObjectsInactive.Include);
-            }
-
-            return uIDocumentPlayerGold;
+            return uIDocumentPlayerGold ??= FindAnyObjectByType<UIDocumentPlayerGold>(FindObjectsInactive.Include);
         }
 
-        UIDocumentReceivedItemPrompt GetUIDocumentReceivedItemPrompt()
+        private UIDocumentReceivedItemPrompt GetUIDocumentReceivedItemPrompt()
         {
-            if (uIDocumentReceivedItemPrompt == null)
-            {
-                uIDocumentReceivedItemPrompt = FindAnyObjectByType<UIDocumentReceivedItemPrompt>(FindObjectsInactive.Include);
-            }
-
-            return uIDocumentReceivedItemPrompt;
+            return uIDocumentReceivedItemPrompt ??= FindAnyObjectByType<UIDocumentReceivedItemPrompt>(FindObjectsInactive.Include);
         }
     }
 }

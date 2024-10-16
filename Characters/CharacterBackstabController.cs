@@ -8,7 +8,7 @@ namespace AF
         public readonly int hashBackstabExecuted = Animator.StringToHash("AI Humanoid - Backstabbed");
 
         public bool waitingForBackstab = false;
-        public bool canBeBackstabbed = true;
+        public bool isBeingBackstabbed = false;
 
         public CharacterBaseManager character;
 
@@ -17,6 +17,11 @@ namespace AF
         private void Awake()
         {
             character.damageReceiver.onDamageEvent += OnDamageEvent;
+        }
+
+        public void ResetStates()
+        {
+            isBeingBackstabbed = false;
         }
 
         public Damage OnDamageEvent(CharacterBaseManager attacker, CharacterBaseManager receiver, Damage damage)
@@ -29,6 +34,7 @@ namespace AF
             if (waitingForBackstab)
             {
                 waitingForBackstab = false;
+                isBeingBackstabbed = true;
 
                 character.PlayBusyHashedAnimationWithRootMotion(hashBackstabExecuted);
 
@@ -36,6 +42,11 @@ namespace AF
             }
 
             return damage;
+        }
+
+        public bool CanBeBackstabbed()
+        {
+            return (character as CharacterManager)?.combatant?.allowBackstabs ?? false;
         }
     }
 }

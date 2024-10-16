@@ -5,10 +5,7 @@ namespace AF
 {
     public class CharacterPoise : CharacterAbstractPoise
     {
-        public int maxPoiseHits = 3;
-
-        public bool hasHyperArmor = false;
-
+        [HideInInspector] public bool hasHyperArmor = false;
         bool ignorePoiseDamage = false;
         readonly float recoverPoiseCooldown = 3f;
 
@@ -36,7 +33,7 @@ namespace AF
 
         public override int GetMaxPoiseHits()
         {
-            return maxPoiseHits;
+            return (characterManager as CharacterManager)?.combatant?.poise ?? 1;
         }
 
         public override bool TakePoiseDamage(int poiseDamage)

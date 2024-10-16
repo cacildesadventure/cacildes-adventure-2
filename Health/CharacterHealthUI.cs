@@ -1,7 +1,7 @@
-using UnityEngine;
-
-namespace AF.Health
+namespace AF
 {
+    using AF.Health;
+    using UnityEngine;
 
     public class CharacterHealthUI : MonoBehaviour
     {
@@ -30,7 +30,6 @@ namespace AF.Health
             {
                 healthSlider.maxValue = characterHealth.GetMaxHealth() * 0.01f;
                 healthSlider.value = characterHealth.GetCurrentHealth() * 0.01f;
-                healthSlider.gameObject.SetActive(false);
             }
         }
 

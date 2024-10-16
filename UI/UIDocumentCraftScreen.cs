@@ -523,11 +523,11 @@ namespace AF
             root.Q<Label>("MagicAttack").style.display = DisplayStyle.None;
             root.Q<Label>("DarknessAttack").style.display = DisplayStyle.None;
 
-            if (weapon.GetWeaponAttackForLevel(nextLevel) > 0)
+            if (weapon.GetWeaponAttackForLevel(playerManager.attackStatManager, nextLevel) > 0)
             {
                 root.Q<Label>("PhysicalAttack").style.display = DisplayStyle.Flex;
                 root.Q<Label>("PhysicalAttack").text = NextPhysicalDamage_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponAttackForLevel(weapon.level) + " > " + weapon.GetWeaponAttackForLevel(nextLevel);
+                    + weapon.GetWeaponAttackForLevel(playerManager.attackStatManager, weapon.level) + " > " + weapon.GetWeaponAttackForLevel(playerManager.attackStatManager, nextLevel);
             }
             if (weapon.GetWeaponFireAttackForLevel(nextLevel) > 0)
             {
@@ -549,11 +549,11 @@ namespace AF
                 root.Q<Label>("LightningAttack").text = NextLightningBonus_LocalizedString.GetLocalizedString() + " "
                     + weapon.GetWeaponLightningAttackForLevel(weapon.level, playerReputation) + " > " + weapon.GetWeaponLightningAttackForLevel(nextLevel, playerReputation);
             }
-            if (weapon.GetWeaponMagicAttackForLevel(nextLevel) > 0)
+            if (weapon.GetWeaponMagicAttackForLevel(nextLevel, playerManager.attackStatManager) > 0)
             {
                 root.Q<Label>("MagicAttack").style.display = DisplayStyle.Flex;
                 root.Q<Label>("MagicAttack").text = NextMagicBonus_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponMagicAttackForLevel(weapon.level) + " > " + weapon.GetWeaponMagicAttackForLevel(nextLevel);
+                    + weapon.GetWeaponMagicAttackForLevel(weapon.level, playerManager.attackStatManager) + " > " + weapon.GetWeaponMagicAttackForLevel(nextLevel, playerManager.attackStatManager);
             }
             if (weapon.GetWeaponDarknessAttackForLevel(nextLevel, playerReputation) > 0)
             {
@@ -613,6 +613,7 @@ namespace AF
 
             GameAnalytics.NewDesignEvent(eventName);
         }
+
         void LogAnalytic(string eventName, Dictionary<string, object> values)
         {
             if (!GameAnalytics.Initialized)
