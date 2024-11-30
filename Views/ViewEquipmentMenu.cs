@@ -12,6 +12,10 @@ namespace AF.UI.EquipmentMenu
         public PlayerStatsAndAttributesUI playerStatsAndAttributesUI;
         public ItemList itemList;
 
+        [Header("Footer")]
+        public MenuFooter menuFooter;
+        public ActionButton confirmButton, unequipButton, exitMenuButton;
+
         [Header("Databases")]
         public PlayerStatsDatabase playerStatsDatabase;
 
@@ -23,6 +27,9 @@ namespace AF.UI.EquipmentMenu
             itemList.gameObject.SetActive(false);
             itemTooltip.gameObject.SetActive(false);
             playerStatsAndAttributesUI.gameObject.SetActive(true);
+
+            menuFooter.SetupReferences();
+            SetupFooterActions();
 
             InitUI();
         }
@@ -40,7 +47,6 @@ namespace AF.UI.EquipmentMenu
             playerStatsAndAttributesUI.shouldRerender = true;
         }
 
-
         void InitUI()
         {
             equipmentSlots.gameObject.SetActive(true);
@@ -48,6 +54,12 @@ namespace AF.UI.EquipmentMenu
             playerStatsAndAttributesUI.DrawStats(null);
         }
 
+        void SetupFooterActions()
+        {
+            menuFooter.GetFooterActionsContainer().Add(confirmButton.GetKey(starterAssetsInputs));
+            menuFooter.GetFooterActionsContainer().Add(unequipButton.GetKey(starterAssetsInputs));
+            menuFooter.GetFooterActionsContainer().Add(exitMenuButton.GetKey(starterAssetsInputs));
+        }
     }
 
 }

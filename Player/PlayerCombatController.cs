@@ -7,8 +7,8 @@ namespace AF
 {
     public class PlayerCombatController : MonoBehaviour
     {
-
-        public readonly int hashLightAttack1 = Animator.StringToHash("Light Attack 1");
+        public float crossFade = 0.1f;
+        public readonly string hashLightAttack1 = "Light Attack 1";
         public readonly string hashLightAttack2 = "Light Attack 2";
         public readonly string hashLightAttack3 = "Light Attack 3";
         public readonly string hashLightAttack4 = "Light Attack 4";
@@ -101,19 +101,19 @@ namespace AF
 
                 if (lightAttackComboIndex == 0)
                 {
-                    playerManager.PlayBusyHashedAnimationWithRootMotion(hashLightAttack1);
+                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack1, crossFade);
                 }
                 else if (lightAttackComboIndex == 1)
                 {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack2, 0.05f);
+                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack2, crossFade);
                 }
                 else if (lightAttackComboIndex == 2)
                 {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack3, 0.05f);
+                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack3, crossFade);
                 }
                 else if (lightAttackComboIndex == 3)
                 {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack4, 0.05f);
+                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack4, crossFade);
                 }
 
                 HandleAttackSpeed();

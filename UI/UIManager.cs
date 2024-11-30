@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using AF.Shops;
 using AF.UI;
 using UnityEngine;
@@ -30,6 +32,8 @@ namespace AF
 
         [Header("Components")]
         public NotificationManager notificationManager;
+
+        public List<GameObject> displayedUis = new();
 
         private void Awake()
         {

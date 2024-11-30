@@ -462,4 +462,35 @@ public class EquipmentDatabase : ScriptableObject
         EventManager.EmitEvent(EventMessages.ON_TWO_HANDING_CHANGED);
     }
 
+    public bool IsEquipped(ArmorBase armorBase)
+    {
+        if (armorBase == null)
+        {
+            return false;
+        }
+
+        if (armorBase is Helmet)
+        {
+            return helmet == armorBase;
+        }
+        else if (armorBase is Gauntlet)
+        {
+            return gauntlet == armorBase;
+        }
+        else if (armorBase is Armor)
+        {
+            return armor == armorBase;
+        }
+        else if (armorBase is Legwear)
+        {
+            return legwear == armorBase;
+        }
+        else if (armorBase is Accessory)
+        {
+            return accessories.Contains(armorBase);
+        }
+
+        return false;
+    }
+
 }

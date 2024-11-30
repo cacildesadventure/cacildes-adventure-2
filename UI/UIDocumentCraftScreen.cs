@@ -406,8 +406,7 @@ namespace AF
 
         bool ShouldRuinMixture(CraftingRecipe recipe)
         {
-            var ingredientThatCanRuinMixture = recipe.ingredients.FirstOrDefault(x => x.ingredient.chanceToRuinMixture > 0);
-            return ingredientThatCanRuinMixture != null && Random.Range(0, 100) < ingredientThatCanRuinMixture.ingredient.chanceToRuinMixture;
+            return false;
         }
 
         void HandleCraftSuccess(CraftingRecipe recipe)

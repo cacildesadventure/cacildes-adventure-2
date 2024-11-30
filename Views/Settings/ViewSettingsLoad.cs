@@ -68,12 +68,7 @@ namespace AF
             scrollPanel.Clear();
             selectedSaveFile = "";
 
-            List<Scroller> scrollers = scrollPanel.Query<Scroller>().ToList();
-            foreach (Scroller scroller in scrollers)
-            {
-                scroller.Q<VisualElement>("unity-slider").focusable = false;
-                scroller.Q<VisualElement>("unity-slider").Q<VisualElement>().focusable = false;
-            }
+            UIUtils.SetupSlider(scrollPanel);
 
             foreach (var saveFileName in SaveUtils.GetSaveFileNames(SaveUtils.SAVE_FILES_FOLDER))
             {

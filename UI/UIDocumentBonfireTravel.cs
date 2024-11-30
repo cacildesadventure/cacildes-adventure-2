@@ -1,17 +1,18 @@
-using System.Collections.Generic;
-using AF.Bonfires;
-using UnityEngine;
-using UnityEngine.UIElements;
-
 namespace AF
 {
+    using System.Collections.Generic;
+    using AF.Bonfires;
+    using AF.UI;
+    using UnityEngine;
+    using UnityEngine.Localization.Settings;
+    using UnityEngine.UIElements;
+
+
     [System.Serializable]
     public class BonfireLocation
     {
+        public Location location;
         public string bonfireId;
-        public Sprite image;
-
-        public string sceneName;
         public string spawnGameObjectNameRef;
     }
 
@@ -22,15 +23,17 @@ namespace AF
         [Header("Components")]
         public Soundbank soundbank;
         public CursorManager cursorManager;
-        public PlayerManager playerManager;
         public TeleportManager teleportManager;
 
         [Header("UI Documents")]
         public UIDocument uIDocument;
         public VisualTreeAsset travelOptionAsset;
         public UIDocumentBonfireMenu uIDocumentBonfireMenu;
+        [Header("Footer")]
+        public MenuFooter menuFooter;
 
-
+        public ActionButton confirmButton, exitMenuButton;
+        public StarterAssetsInputs starterAssetsInputs;
         [Header("Databases")]
         public BonfiresDatabase bonfiresDatabase;
 
@@ -39,7 +42,6 @@ namespace AF
 
         // Last scroll position
         int lastScrollElementIndex = -1;
-
 
         private void Awake()
         {
@@ -57,7 +59,6 @@ namespace AF
             }
         }
 
-
         void Close()
         {
             uIDocumentBonfireMenu.gameObject.SetActive(true);
@@ -71,9 +72,13 @@ namespace AF
             root.Q<ScrollView>().Clear();
             root.Q<IMGUIContainer>("BonfireIcon").style.opacity = 0;
 
+
+            menuFooter.SetupReferences();
+            SetupFooterActions();
+
             // The exit button
             var exitOption = travelOptionAsset.CloneTree();
-            exitOption.Q<Button>().text = "Return";
+            exitOption.Q<Button>().text = GetReturnLabel();
 
             UIUtils.SetupButton(exitOption.Q<Button>(), () =>
             {
@@ -100,16 +105,16 @@ namespace AF
                 if (bonfiresDatabase.unlockedBonfires.Contains(location.bonfireId))
                 {
                     var clonedBonfireOption = travelOptionAsset.CloneTree();
-                    clonedBonfireOption.Q<Button>().text = location.bonfireId;
+                    clonedBonfireOption.Q<Button>().text = location.location.GetLocationDisplayName();
 
                     UIUtils.SetupButton(clonedBonfireOption.Q<Button>(), () =>
                     {
-                        teleportManager.Teleport(location.sceneName, location.spawnGameObjectNameRef);
+                        teleportManager.Teleport(location.location.name, location.spawnGameObjectNameRef);
                     },
                     () =>
                     {
                         {
-                            root.Q<IMGUIContainer>("BonfireIcon").style.backgroundImage = new StyleBackground(location.image);
+                            root.Q<IMGUIContainer>("BonfireIcon").style.backgroundImage = new StyleBackground(location.location.locationThumbnail);
                             root.Q<IMGUIContainer>("BonfireIcon").style.opacity = 1;
                             root.Q<ScrollView>().ScrollTo(clonedBonfireOption);
                         }
@@ -149,6 +154,20 @@ namespace AF
                 }
             );
         }
-    }
+        void SetupFooterActions()
+        {
+            menuFooter.GetFooterActionsContainer().Add(confirmButton.GetKey(starterAssetsInputs));
+            menuFooter.GetFooterActionsContainer().Add(exitMenuButton.GetKey(starterAssetsInputs));
+        }
 
+        string GetReturnLabel()
+        {
+            if (LocalizationSettings.SelectedLocale.Identifier.Code == "pt")
+            {
+                return "Regressar";
+            }
+
+            return "Return";
+        }
+    }
 }

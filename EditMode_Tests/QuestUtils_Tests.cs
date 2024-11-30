@@ -17,35 +17,41 @@ namespace AF.Tests
         public void SetUp()
         {
             map1 = ScriptableObject.CreateInstance<SceneTeleport>();
+
+            var Map1 = ScriptableObject.CreateInstance<Location>();
+            var Map2 = ScriptableObject.CreateInstance<Location>();
+            var Map3 = ScriptableObject.CreateInstance<Location>();
+            var Map4 = ScriptableObject.CreateInstance<Location>();
+
             map1.name = "Map1";
-            map1.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<string, string>()
+            map1.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<Location, string>()
             {
-                {"Map2", "A"},
-                {"Map3", "A"},
+                {Map2, "A"},
+                {Map3, "A"},
             };
 
             map2 = ScriptableObject.CreateInstance<SceneTeleport>();
             map2.name = "Map2";
-            map2.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<string, string>()
+            map2.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<Location, string>()
             {
-                {"Map1", "A"},
-                {"Map3", "B"},
+                {Map1, "A"},
+                {Map3, "B"},
             };
 
             map3 = ScriptableObject.CreateInstance<SceneTeleport>();
             map3.name = "Map3";
-            map3.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<string, string>()
+            map3.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<Location, string>()
             {
-                {"Map1", "B"},
-                {"Map2", "B"},
-                {"Map4", "A"},
+                {Map1, "B"},
+                {Map2, "B"},
+                {Map4, "A"},
             };
 
             map4 = ScriptableObject.CreateInstance<SceneTeleport>();
             map4.name = "Map4";
-            map4.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<string, string>()
+            map4.teleports = new AYellowpaper.SerializedCollections.SerializedDictionary<Location, string>()
             {
-                {"Map3", "C"},
+                {Map3, "C"},
             };
 
             sceneTeleports = new SceneTeleport[] { map1, map2, map3, map4 };

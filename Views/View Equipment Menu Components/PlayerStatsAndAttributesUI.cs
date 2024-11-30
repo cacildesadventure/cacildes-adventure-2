@@ -50,6 +50,8 @@ namespace AF
             SetLocalizedLabel("Level", "Level ", "Nível ", playerStatsDatabase.GetCurrentLevel());
             SetLocalizedLabel("Gold", " Gold ", " Ouro ", playerStatsDatabase.gold);
 
+            SetGoldForNextLevelLabel();
+
             int baseAttack = attackStatManager.GetCurrentAttackForWeapon(equipmentDatabase.GetCurrentWeapon());
             int itemAttack = GetItemAttack(item, baseAttack);
 
@@ -75,12 +77,18 @@ namespace AF
             SetStatLabel("Strength", playerBaseStats.strength, itemBonusStats.strength);
             SetStatLabel("Dexterity", playerBaseStats.dexterity, itemBonusStats.dexterity);
             SetStatLabel("Intelligence", playerBaseStats.intelligence, itemBonusStats.intelligence);
-            SetStatLabel("Reputation", playerBaseStats.reputation, itemBonusStats.reputation);
+
+            SetStatLabel("Health",
+                playerManager.health.GetMaxHealth(), itemBonusStats.healthBonus, "" + (int)playerManager.health.GetCurrentHealth());
+            SetStatLabel("Stamina",
+                playerManager.staminaStatManager.GetMaxStamina(), itemBonusStats.staminaBonus, "" + (int)playerManager.playerStatsDatabase.currentStamina);
+            SetStatLabel("Mana",
+                playerManager.manaManager.GetMaxMana(), itemBonusStats.manaBonus, "" + (int)playerManager.playerStatsDatabase.currentMana);
 
             SetStatLabel("Poise", basePoise, itemPoise);
             SetStatLabel("Posture", basePosture, itemPosture);
-
             SetWeightLoadLabel("WeightLoad", baseEquipLoad, itemEquipLoad);
+            SetStatLabel("Reputation", playerBaseStats.reputation, itemBonusStats.reputation);
 
             SetStatLabel("PhysicalAttack", baseAttack, itemAttack);
 
@@ -122,9 +130,30 @@ namespace AF
                     : 0);
         }
 
-        private void SetStatLabel(string elementName, int baseValue, int itemValue)
+        void SetGoldForNextLevelLabel()
         {
-            string label = baseValue.ToString();
+            string goldLabel = " " + LocalizationSettings.SelectedLocale.Identifier.Code == "en" ? "Gold" : "Ouro";
+
+            root.Q<VisualElement>("GoldForNextLevel").Q<Label>("Label").text =
+                playerManager.playerLevelManager.GetRequiredExperienceForNextLevel() + " " + goldLabel;
+            Label description =
+            root.Q<VisualElement>("GoldForNextLevel").Q<Label>("Description");
+
+            bool hasEnoughGoldForLevellingUp = false;
+            string enoughGoldLabel = " " + LocalizationSettings.SelectedLocale.Identifier.Code == "en" ? "Level up available"
+                : "Subida de nível disponível";
+            string notEnoughGoldLabel = " " + LocalizationSettings.SelectedLocale.Identifier.Code == "en" ? "Amount for next level"
+                : "Necessário para próximo nível";
+
+            description.text = hasEnoughGoldForLevellingUp ? enoughGoldLabel : notEnoughGoldLabel;
+            description.style.opacity = hasEnoughGoldForLevellingUp ? 1 : 0.5f;
+        }
+
+        private void SetStatLabel(string elementName, int baseValue, int itemValue, string currentValue = "")
+        {
+            string label = (!string.IsNullOrEmpty(currentValue) ?
+                (currentValue + "/")
+                : "") + baseValue.ToString();
 
             Label changeIndicator =
                   root.Q<VisualElement>(elementName).Q<Label>("ChangeIndicator");
@@ -196,7 +225,9 @@ namespace AF
             );
         }
 
-        private (int vitality, int endurance, int strength, int dexterity, int intelligence, int reputation) GetItemBonusStats(Item item)
+        private (
+            int vitality, int endurance, int strength, int dexterity, int intelligence, int reputation,
+            int healthBonus, int staminaBonus, int manaBonus) GetItemBonusStats(Item item)
         {
             if (item is ArmorBase armor)
             {
@@ -206,10 +237,13 @@ namespace AF
                     EquipmentUtils.GetAttributeFromEquipment(armor, EquipmentUtils.AttributeType.STRENGTH, playerStatsBonusController, equipmentDatabase),
                     EquipmentUtils.GetAttributeFromEquipment(armor, EquipmentUtils.AttributeType.DEXTERITY, playerStatsBonusController, equipmentDatabase),
                     EquipmentUtils.GetAttributeFromEquipment(armor, EquipmentUtils.AttributeType.INTELLIGENCE, playerStatsBonusController, equipmentDatabase),
-                    EquipmentUtils.GetAttributeFromEquipment(armor, EquipmentUtils.AttributeType.REPUTATION, playerStatsBonusController, equipmentDatabase)
+                    EquipmentUtils.GetAttributeFromEquipment(armor, EquipmentUtils.AttributeType.REPUTATION, playerStatsBonusController, equipmentDatabase),
+                    EquipmentUtils.GetAttributeFromAccessory(armor as Accessory, EquipmentUtils.AccessoryAttributeType.HEALTH_BONUS, playerManager, equipmentDatabase),
+                    EquipmentUtils.GetAttributeFromAccessory(armor as Accessory, EquipmentUtils.AccessoryAttributeType.STAMINA_BONUS, playerManager, equipmentDatabase),
+                    EquipmentUtils.GetAttributeFromAccessory(armor as Accessory, EquipmentUtils.AccessoryAttributeType.MANA_BONUS, playerManager, equipmentDatabase)
                 );
             }
-            return (0, 0, 0, 0, 0, 0);
+            return (0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
         private int GetItemAttack(Item item, int baseAttack)

@@ -10,21 +10,16 @@ namespace AF
         public LocalizedString displayName;
         public LocalizedString displayNameWhenApplied;
 
-        public string builtUpName;
-        public string appliedName;
         public Sprite icon;
         public Color barColor;
         public bool isPositive = false;
         public bool isAppliedImmediately = false;
-        public float decreaseRateWithDamage = 1f;
-        public float decreaseRateWithoutDamage = 5f;
-
 
         public string GetName()
         {
             if (displayName == null || displayName.IsEmpty)
             {
-                return builtUpName;
+                return "";
             }
 
             return displayName.GetLocalizedString();
@@ -34,7 +29,7 @@ namespace AF
         {
             if (displayNameWhenApplied == null || displayNameWhenApplied.IsEmpty)
             {
-                return appliedName;
+                return "";
             }
 
             return displayNameWhenApplied.GetLocalizedString();

@@ -38,14 +38,11 @@ namespace AF.Pickups
                     }
                 }
 
-                bool isCard = item.Key is Card;
-
                 itemsToDisplay.Add(new()
                 {
                     itemName = item.Key.GetName(),
                     quantity = item.Value.amount,
                     sprite = item.Key.sprite,
-                    isCard = isCard
                 });
 
                 GetPlayerInventory().AddItem(item.Key, item.Value.amount);

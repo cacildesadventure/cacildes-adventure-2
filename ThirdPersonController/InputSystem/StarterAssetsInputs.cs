@@ -139,7 +139,7 @@ namespace AF
 			}
 		}
 
-		public void OnTab(InputValue value)
+		public void OnChangeCombatStance(InputValue value)
 		{
 			onToggleTwoHandsInput?.Invoke();
 		}

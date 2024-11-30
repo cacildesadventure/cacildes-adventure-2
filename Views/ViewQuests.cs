@@ -15,6 +15,9 @@ namespace AF
 
         [Header("Quests")]
         public QuestsDatabase questsDatabase;
+        [Header("Footer")]
+        public MenuFooter menuFooter;
+        public ActionButton trackQuestButton, exitMenuButton;
 
         ScrollView questsScrollView;
 
@@ -28,6 +31,8 @@ namespace AF
             base.OnEnable();
             SetupRefs();
 
+            menuFooter.SetupReferences();
+            SetupFooterActions();
             RedrawUI();
         }
 
@@ -94,7 +99,7 @@ namespace AF
                 questsScrollView.Add(clone);
             }
 
-            if (questsScrollView.childCount > 0 && questsScrollView.childCount <= elementToFocusIndex && questsScrollView.ElementAt(elementToFocusIndex) != null)
+            if (questsScrollView.childCount > 0 && questsScrollView.childCount >= elementToFocusIndex && questsScrollView.ElementAt(elementToFocusIndex) != null)
             {
                 var btn = questsScrollView.ElementAt(elementToFocusIndex).Q<Button>("QuestButton");
                 btn.Focus();
@@ -125,9 +130,7 @@ namespace AF
 
                 if (idx == questParent.questProgress)
                 {
-                    questObjectiveEntry.Q<Label>("QuestObjectiveLabel").style.color = new Color(255, 194, 0);
                     questObjectiveEntry.Q<Label>("QuestObjectiveLabel").style.unityFontStyleAndWeight = new StyleEnum<FontStyle>(FontStyle.Bold);
-                    questObjectiveEntry.Q<VisualElement>("QuestObjectiveIncomplete").style.unityBackgroundImageTintColor = new Color(255, 194, 0);
                 }
 
                 if (!isCompleted && idx > questParent.questProgress)
@@ -142,6 +145,12 @@ namespace AF
 
             questObjectivesContainer.style.opacity = 1;
             questPreview.style.opacity = 1;
+        }
+
+        void SetupFooterActions()
+        {
+            menuFooter.GetFooterActionsContainer().Add(trackQuestButton.GetKey(starterAssetsInputs));
+            menuFooter.GetFooterActionsContainer().Add(exitMenuButton.GetKey(starterAssetsInputs));
         }
     }
 }

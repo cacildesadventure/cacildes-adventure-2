@@ -1,15 +1,16 @@
-using System.Collections;
-using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEngine.InputSystem;
-using System.Linq;
-using DG.Tweening;
-using UnityEngine.Events;
-using AF.Dialogue;
-using AF.Flags;
 
 namespace AF
 {
+    using System.Collections;
+    using UnityEngine;
+    using UnityEngine.UIElements;
+    using System.Linq;
+    using DG.Tweening;
+    using UnityEngine.Events;
+    using AF.Dialogue;
+    using AF.Flags;
+    using AF.UI;
+
     public class UIDocumentDialogueWindow : MonoBehaviour
     {
         [Header("UI Documents")]
@@ -38,10 +39,13 @@ namespace AF
 
         // Internal
         Label actorNameLabel, actorTitleLabel, messageTextLabel, pressToContinueLabel;
-        IMGUIContainer actorSprite;
+        VisualElement actorSprite;
         VisualElement actorInfoContainer;
 
-        VisualElement gamepadIcon, xboxIcon;
+        [Header("Input")]
+        VisualElement actionButtonContainer;
+        public StarterAssetsInputs starterAssetsInputs;
+        public ActionButton continueButton;
 
         private void Awake()
         {
@@ -55,18 +59,23 @@ namespace AF
             this.actorNameLabel = this.root.Q<Label>("ActorName");
             this.actorTitleLabel = this.root.Q<Label>("ActorTitle");
             this.messageTextLabel = this.root.Q<Label>("MessageText");
-            this.actorSprite = this.root.Q<IMGUIContainer>("ActorSprite");
+            this.actorSprite = this.root.Q<VisualElement>("ActorSprite");
             this.pressToContinueLabel = this.root.Q<Label>("PressToContinue");
             this.actorInfoContainer = this.root.Q<VisualElement>("ActorInfoContainer");
-            this.gamepadIcon = this.root.Q<VisualElement>("GamepadIcon");
-            this.xboxIcon = this.root.Q<VisualElement>("XboxIcon");
+            actionButtonContainer = this.root.Q<VisualElement>("ContinueButtonContainer");
+            actionButtonContainer.Clear();
+
+            actionButtonContainer.Add(continueButton.GetKey(starterAssetsInputs));
 
             onEnableEvent?.Invoke();
+
+            playerManager.uIDocumentPlayerHUDV2.HideHUD();
         }
 
         private void OnDisable()
         {
             onDisableEvent?.Invoke();
+            playerManager.uIDocumentPlayerHUDV2.ShowHUD();
         }
 
         public IEnumerator DisplayMessage(
@@ -132,19 +141,6 @@ namespace AF
 
             dialogueChoicePanel.Clear();
             dialogueChoicePanel.style.display = DisplayStyle.None;
-
-            if (Gamepad.current == null)
-            {
-                string oldText = pressToContinueLabel.text;
-                pressToContinueLabel.text = "E) " + oldText;
-                gamepadIcon.style.display = DisplayStyle.None;
-                xboxIcon.style.display = DisplayStyle.None;
-            }
-            else
-            {
-                gamepadIcon.style.display = DisplayStyle.Flex;
-                xboxIcon.style.display = DisplayStyle.Flex;
-            }
 
             if (character != null && string.IsNullOrEmpty(character.name) == false)
             {

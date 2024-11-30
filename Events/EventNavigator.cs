@@ -1,7 +1,7 @@
-using UnityEngine;
-
 namespace AF
 {
+    using UnityEngine;
+
     public class EventNavigator : MonoBehaviour
     {
         [Header("Layer Options")]
@@ -12,18 +12,41 @@ namespace AF
         public UIManager uiManager;
         public MomentManager momentManager;
         public GameSettings gameSettings;
+        public UIDocumentKeyPrompt uIDocumentKeyPrompt;
 
-        // Internal
         IEventNavigatorCapturable currentTarget;
 
-        public UIDocumentKeyPrompt uIDocumentKeyPrompt;
+        bool canInteract = true;
+
+        public void SetCanInteract(bool value)
+        {
+            if (value)
+            {
+                canInteract = true;
+            }
+            else
+            {
+                canInteract = false;
+                uIDocumentKeyPrompt.gameObject.SetActive(false);
+            }
+        }
+
+        bool CanInteract()
+        {
+            if (uiManager.IsShowingFullScreenGUI() || momentManager.HasMomentOnGoing)
+            {
+                return false;
+            }
+
+            return canInteract;
+        }
 
         /// <summary>
         /// Unity Event
         /// </summary>
         public void OnInteract()
         {
-            if (uiManager.IsShowingFullScreenGUI() || momentManager.HasMomentOnGoing)
+            if (!CanInteract())
             {
                 return;
             }
@@ -33,6 +56,11 @@ namespace AF
 
         private void Update()
         {
+            if (!CanInteract())
+            {
+                return;
+            }
+
             bool hitSomething = Physics.Raycast(
                 Camera.main.transform.position,
                 Camera.main.transform.forward, out var hitInfo, gameSettings.cameraDistance + 1, eventNavigatorCapturableLayer);

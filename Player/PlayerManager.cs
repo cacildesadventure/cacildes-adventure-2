@@ -1,19 +1,19 @@
-using System.Collections.Generic;
-using AF.Animations;
-using AF.Equipment;
-using AF.Events;
-using AF.Footsteps;
-using AF.Health;
-using AF.Inventory;
-using AF.Ladders;
-using AF.Reputation;
-using AF.Shooting;
-using AF.Stats;
-using TigerForge;
-using UnityEngine;
-
 namespace AF
 {
+    using System.Collections.Generic;
+    using AF.Animations;
+    using AF.Equipment;
+    using AF.Events;
+    using AF.Footsteps;
+    using AF.Health;
+    using AF.Inventory;
+    using AF.Ladders;
+    using AF.Reputation;
+    using AF.Shooting;
+    using AF.Stats;
+    using TigerForge;
+    using UnityEngine;
+
     public class PlayerManager : CharacterBaseManager
     {
         public ThirdPersonController thirdPersonController;
@@ -49,6 +49,7 @@ namespace AF
         public PlayerCardManager playerCardManager;
         public ExecutionerManager executionerManager;
         public UIDocumentPlayerHUDV2 uIDocumentPlayerHUDV2;
+        public PushObjectManager pushObjectManager;
 
         [Header("Databases")]
         public PlayerStatsDatabase playerStatsDatabase;
@@ -173,6 +174,11 @@ namespace AF
             animator.runtimeAnimatorController = defaultAnimatorController;
 
             Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
+            if (currentWeapon == null && equipmentDatabase.isTwoHanding)
+            {
+                currentWeapon = twoHandingController.twoHandUnarmedWeapon;
+            }
+
             if (currentWeapon != null)
             {
                 if (currentWeapon.animationOverrides.Count > 0)
@@ -247,7 +253,6 @@ namespace AF
         {
             return _canUseWeaponIK;
         }
-
 
         public Damage OnDamageEvent(CharacterBaseManager attacker, CharacterBaseManager receiver, Damage damage)
         {

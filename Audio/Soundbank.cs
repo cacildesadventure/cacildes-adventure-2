@@ -13,17 +13,14 @@ namespace AF
         public AudioClip uiHover;
         public AudioClip uiCancel;
         public AudioClip uiItemReceived;
-        public AudioClip insufficientStamina;
-        public AudioClip quickItemSwitch;
-        public AudioClip enemyGuardBreak;
         public AudioClip reputationIncreased;
         public AudioClip reputationDecreased;
         public AudioClip mainMenuOpen;
         public AudioClip uiEquip;
-        public AudioClip uiUnequip;
         public AudioClip uiLockOn;
         public AudioClip uiLockOnSwitchTarget;
         public AudioClip switchTwoHand;
+        public AudioClip puzzleWon;
 
         [Header("Movement")]
         public AudioClip cloth;

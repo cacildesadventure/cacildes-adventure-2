@@ -316,5 +316,9 @@ namespace AF.Animations
         {
             characterManager.characterBaseShooter.HideRifleWeapon();
         }
+
+        public void OnPushObject()
+        {
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
@@ -133,5 +134,15 @@ namespace AF
                        });
         }
 
+        public static void SetupSlider(ScrollView scrollPanel)
+        {
+
+            List<Scroller> scrollers = scrollPanel.Query<Scroller>().ToList();
+            foreach (Scroller scroller in scrollers)
+            {
+                scroller.Q<VisualElement>("unity-slider").focusable = false;
+                scroller.Q<VisualElement>("unity-slider").Q<VisualElement>().focusable = false;
+            }
+        }
     }
 }

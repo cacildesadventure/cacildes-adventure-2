@@ -1,17 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Localization.Settings;
-
-namespace AF
+﻿namespace AF
 {
+    using UnityEngine;
+
     [CreateAssetMenu(menuName = "Items / Item / New Consumable")]
     public class Consumable : Item
     {
-        [Header("FX")]
-
-        [Header("Remove Negative Status")]
-        public StatusEffect[] statusesToRemove;
-
         [Header("Options")]
         public bool shouldNotRemoveOnUse = false;
         public bool shouldHideEquipmentWhenConsuming = true;
@@ -21,21 +14,6 @@ namespace AF
         [Header("Consume Effects")]
         public StatusEffect[] statusEffectsWhenConsumed;
         public float effectsDurationInSeconds = 6;
-
-        public string GetFormattedRemovedStatusEffects()
-        {
-            string result = "";
-
-            foreach (var statusEffectToRemove in statusesToRemove)
-            {
-                if (statusEffectToRemove != null)
-                {
-                    result += $"{LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Removes Status:")} {statusEffectToRemove.GetName()}\n";
-                }
-            }
-
-            return result.TrimEnd();
-        }
 
         public string GetFormattedAppliedStatusEffects()
         {

@@ -7,7 +7,7 @@ namespace AF
     public class SceneTeleport : ScriptableObject
     {
         [SerializedDictionaryAttribute("Destination Scene", "Spawn Gameobject Name Reference")]
-        public SerializedDictionary<string, string> teleports;
+        public SerializedDictionary<Location, string> teleports;
 
     }
 }

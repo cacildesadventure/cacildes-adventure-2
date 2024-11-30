@@ -15,6 +15,7 @@ namespace AF.UI.EquipmentMenu
         [Header("UI Documents")]
         public UIDocument uIDocument;
         public VisualElement root;
+        public ViewEquipmentMenu viewEquipmentMenu;
 
         public ItemList itemList;
         public ItemTooltip itemTooltip;
@@ -59,7 +60,6 @@ namespace AF.UI.EquipmentMenu
 
         Button otherItemsButton;
 
-        Label menuLabel;
 
         [Header("Sprites")]
         public Texture2D txt_UnequipedWeapon, txt_UnequipedShield, txt_UnequipedArrow,
@@ -73,8 +73,6 @@ namespace AF.UI.EquipmentMenu
         public EquipmentDatabase equipmentDatabase;
 
         [HideInInspector] public bool shouldRerender = true;
-
-        VisualElement keyboardHints, gamepadHints;
 
         Button activeButton;
 
@@ -93,9 +91,6 @@ namespace AF.UI.EquipmentMenu
 
         private void OnDisable()
         {
-            keyboardHints.style.display = DisplayStyle.None;
-            gamepadHints.style.display = DisplayStyle.None;
-
             root.Q<VisualElement>("EquipmentSlots").style.display = DisplayStyle.None;
         }
 
@@ -145,12 +140,6 @@ namespace AF.UI.EquipmentMenu
             consumableButtonSlot10 = root.Q<Button>("ConsumablesButton_Slot10");
 
             otherItemsButton = root.Q<Button>("OtherItemsButton");
-
-            keyboardHints = root.Q<VisualElement>("EquipmentSlotsKeyboardHints");
-            keyboardHints.style.display = DisplayStyle.None;
-
-            gamepadHints = root.Q<VisualElement>("EquipmentSlotsGamepadHints");
-            gamepadHints.style.display = DisplayStyle.None;
 
             AssignWeaponButtonCallbacks();
             AssignShieldButtonCallbacks();
@@ -482,20 +471,7 @@ namespace AF.UI.EquipmentMenu
 
         void DrawUI()
         {
-            if (Gamepad.current != null)
-            {
-                gamepadHints.style.display = DisplayStyle.Flex;
-            }
-            else
-            {
-                keyboardHints.style.display = DisplayStyle.Flex;
-            }
-
             DrawSlotSprites();
-
-            menuLabel = root.Q<Label>("MenuLabel");
-            menuLabel.text = "Equipment";
-            menuLabel.style.display = DisplayStyle.Flex;
 
             // Delay the focus until the next frame, required as a hack for now
             Invoke(nameof(GiveFocus), 0f);
@@ -515,25 +491,29 @@ namespace AF.UI.EquipmentMenu
 
         void OnSlotFocus(string activeSlotMenuLabel, Item item)
         {
-            menuLabel.text = activeSlotMenuLabel;
+
+            string displayName = activeSlotMenuLabel;
 
             if (item != null)
             {
-                menuLabel.text = item.GetName();
+                displayName = item.GetName();
 
                 if (item is Weapon weapon)
                 {
-                    menuLabel.text += " +" + weapon.level;
+                    displayName += " +" + weapon.level;
                 }
+
 
                 itemTooltip.gameObject.SetActive(true);
                 itemTooltip.PrepareTooltipForItem(item);
             }
+
+            viewEquipmentMenu.menuFooter.DisplayTooltip(displayName);
         }
 
         void OnSlotFocusOut()
         {
-            menuLabel.text = LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", "Equipment");
+            viewEquipmentMenu.menuFooter.HideTooltip();
 
             itemTooltip.gameObject.SetActive(false);
         }
@@ -543,7 +523,6 @@ namespace AF.UI.EquipmentMenu
             itemList.gameObject.SetActive(true);
             itemList.DrawUI(equipmentType, slotIndex);
 
-            root.Q<Label>("MenuLabel").text = label;
 
             this.gameObject.SetActive(false);
         }
@@ -610,115 +589,52 @@ namespace AF.UI.EquipmentMenu
         public void OnUnequip()
         {
             Button focusedElement = root.focusController.focusedElement as Button;
-            if (focusedElement == null)
-            {
-                return;
-            }
-
+            if (focusedElement == null) { return; }
             activeButton = focusedElement;
 
-            switch (focusedElement)
+            // Dictionary to map buttons to unequip actions
+            var unequipActions = new Dictionary<Button, System.Action>
+    {
+        { weaponButtonSlot1, () => playerManager.playerWeaponsManager.UnequipWeapon(0) },
+        { weaponButtonSlot2, () => playerManager.playerWeaponsManager.UnequipWeapon(1) },
+        { weaponButtonSlot3, () => playerManager.playerWeaponsManager.UnequipWeapon(2) },
+        { secondaryWeaponButtonSlot1, () => playerManager.playerWeaponsManager.UnequipShield(0) },
+        { secondaryWeaponButtonSlot2, () => playerManager.playerWeaponsManager.UnequipShield(1) },
+        { secondaryWeaponButtonSlot3, () => playerManager.playerWeaponsManager.UnequipShield(2) },
+        { arrowsButtonSlot1, () => equipmentDatabase.UnequipArrow(0) },
+        { arrowsButtonSlot2, () => equipmentDatabase.UnequipArrow(1) },
+        { spellsButtonSlot1, () => equipmentDatabase.UnequipSpell(0) },
+        { spellsButtonSlot2, () => equipmentDatabase.UnequipSpell(1) },
+        { spellsButtonSlot3, () => equipmentDatabase.UnequipSpell(2) },
+        { spellsButtonSlot4, () => equipmentDatabase.UnequipSpell(3) },
+        { spellsButtonSlot5, () => equipmentDatabase.UnequipSpell(4) },
+        { helmetButtonSlot, () => playerManager.equipmentGraphicsHandler.UnequipHelmet() },
+        { armorButtonSlot, () => playerManager.equipmentGraphicsHandler.UnequipArmor() },
+        { gauntletsButtonSlot, () => playerManager.equipmentGraphicsHandler.UnequipGauntlet() },
+        { bootsButtonSlot, () => playerManager.equipmentGraphicsHandler.UnequipLegwear() },
+        { accessoryButtonSlot1, () => playerManager.equipmentGraphicsHandler.UnequipAccessory(0) },
+        { accessoryButtonSlot2, () => playerManager.equipmentGraphicsHandler.UnequipAccessory(1) },
+        { accessoryButtonSlot3, () => playerManager.equipmentGraphicsHandler.UnequipAccessory(2) },
+        { accessoryButtonSlot4, () => playerManager.equipmentGraphicsHandler.UnequipAccessory(3) },
+        { consumableButtonSlot1, () => equipmentDatabase.UnequipConsumable(0) },
+        { consumableButtonSlot2, () => equipmentDatabase.UnequipConsumable(1) },
+        { consumableButtonSlot3, () => equipmentDatabase.UnequipConsumable(2) },
+        { consumableButtonSlot4, () => equipmentDatabase.UnequipConsumable(3) },
+        { consumableButtonSlot5, () => equipmentDatabase.UnequipConsumable(4) },
+        { consumableButtonSlot6, () => equipmentDatabase.UnequipConsumable(5) },
+        { consumableButtonSlot7, () => equipmentDatabase.UnequipConsumable(6) },
+        { consumableButtonSlot8, () => equipmentDatabase.UnequipConsumable(7) },
+        { consumableButtonSlot9, () => equipmentDatabase.UnequipConsumable(8) },
+        { consumableButtonSlot10, () => equipmentDatabase.UnequipConsumable(9) }
+    };
+            // Execute the matching unequip action if the button exists in the dictionary
+            if (unequipActions.TryGetValue(focusedElement, out var unequipAction))
             {
-                case var _ when focusedElement == weaponButtonSlot1:
-                    playerManager.playerWeaponsManager.UnequipWeapon(0);
-                    break;
-                case var _ when focusedElement == weaponButtonSlot2:
-                    playerManager.playerWeaponsManager.UnequipWeapon(1);
-                    break;
-                case var _ when focusedElement == weaponButtonSlot3:
-                    playerManager.playerWeaponsManager.UnequipWeapon(2);
-                    break;
-                case var _ when focusedElement == secondaryWeaponButtonSlot1:
-                    playerManager.playerWeaponsManager.UnequipShield(0);
-                    break;
-                case var _ when focusedElement == secondaryWeaponButtonSlot2:
-                    playerManager.playerWeaponsManager.UnequipShield(1);
-                    break;
-                case var _ when focusedElement == secondaryWeaponButtonSlot3:
-                    playerManager.playerWeaponsManager.UnequipShield(2);
-                    break;
-                case var _ when focusedElement == arrowsButtonSlot1:
-                    equipmentDatabase.UnequipArrow(0);
-                    break;
-                case var _ when focusedElement == arrowsButtonSlot2:
-                    equipmentDatabase.UnequipArrow(1);
-                    break;
-                case var _ when focusedElement == spellsButtonSlot1:
-                    equipmentDatabase.UnequipSpell(0);
-                    break;
-                case var _ when focusedElement == spellsButtonSlot2:
-                    equipmentDatabase.UnequipSpell(1);
-                    break;
-                case var _ when focusedElement == spellsButtonSlot3:
-                    equipmentDatabase.UnequipSpell(2);
-                    break;
-                case var _ when focusedElement == spellsButtonSlot4:
-                    equipmentDatabase.UnequipSpell(3);
-                    break;
-                case var _ when focusedElement == spellsButtonSlot5:
-                    equipmentDatabase.UnequipSpell(4);
-                    break;
-                case var _ when focusedElement == helmetButtonSlot:
-                    playerManager.equipmentGraphicsHandler.UnequipHelmet();
-                    break;
-                case var _ when focusedElement == armorButtonSlot:
-                    playerManager.equipmentGraphicsHandler.UnequipArmor();
-                    break;
-                case var _ when focusedElement == gauntletsButtonSlot:
-                    playerManager.equipmentGraphicsHandler.UnequipGauntlet();
-                    break;
-                case var _ when focusedElement == bootsButtonSlot:
-                    playerManager.equipmentGraphicsHandler.UnequipLegwear();
-                    break;
-                case var _ when focusedElement == accessoryButtonSlot1:
-                    playerManager.equipmentGraphicsHandler.UnequipAccessory(0);
-                    break;
-                case var _ when focusedElement == accessoryButtonSlot2:
-                    playerManager.equipmentGraphicsHandler.UnequipAccessory(1);
-                    break;
-                case var _ when focusedElement == accessoryButtonSlot3:
-                    playerManager.equipmentGraphicsHandler.UnequipAccessory(2);
-                    break;
-                case var _ when focusedElement == accessoryButtonSlot4:
-                    playerManager.equipmentGraphicsHandler.UnequipAccessory(3);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot1:
-                    equipmentDatabase.UnequipConsumable(0);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot2:
-                    equipmentDatabase.UnequipConsumable(1);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot3:
-                    equipmentDatabase.UnequipConsumable(2);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot4:
-                    equipmentDatabase.UnequipConsumable(3);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot5:
-                    equipmentDatabase.UnequipConsumable(4);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot6:
-                    equipmentDatabase.UnequipConsumable(5);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot7:
-                    equipmentDatabase.UnequipConsumable(6);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot8:
-                    equipmentDatabase.UnequipConsumable(7);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot9:
-                    equipmentDatabase.UnequipConsumable(8);
-                    break;
-                case var _ when focusedElement == consumableButtonSlot10:
-                    equipmentDatabase.UnequipConsumable(9);
-                    break;
-                default:
-                    return;
+                unequipAction.Invoke();
+                soundbank.PlaySound(soundbank.uiCancel);
+                DrawUI();
             }
-
-            soundbank.PlaySound(soundbank.uiCancel);
-
-            DrawUI();
         }
+
     }
 }

@@ -128,7 +128,7 @@ namespace AF.Shooting
                     }
 
                     ShootBow(equipmentDatabase.GetCurrentArrow(), transform, lockOnManager.nearestLockOnTarget?.transform);
-                    uIDocumentPlayerHUDV2.UpdateEquipment();
+                    uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
                     return;
                 }
 

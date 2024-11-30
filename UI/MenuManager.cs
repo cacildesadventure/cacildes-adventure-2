@@ -16,9 +16,11 @@ namespace AF
         [HideInInspector] public bool hasPlayedFadeIn = false;
 
         [Header("Components")]
-
+        public UIManager uIManager;
+        public UIDocumentPlayerHUDV2 uIDocumentPlayerHUDV2;
         public CursorManager cursorManager;
         public UIDocumentCraftScreen craftScreen;
+        public UIDocumentAlchemy uIDocumentAlchemy;
         public TitleScreenManager titleScreenManager;
         public UIDocumentBook uIDocumentBook;
         public UIDocumentGameOver uIDocumentGameOver;
@@ -52,9 +54,6 @@ namespace AF
         public GameObject[] nestedMenus;
 
         public Texture2D screenshotBeforeOpeningMenu;
-
-        float timeThatSwitchedMenu;
-        float timeToSwitchMenuCooldown = 0.25f;
 
         /// <summary>
         /// Unity Event
@@ -165,6 +164,8 @@ namespace AF
             playerManager.playerComponentManager.DisablePlayerControl();
             playerManager.thirdPersonController.LockCameraPosition = true;
             cursorManager.ShowCursor();
+
+            uIDocumentPlayerHUDV2.HideHUD();
         }
 
         public void CloseMenu()
@@ -174,6 +175,7 @@ namespace AF
             playerManager.thirdPersonController.LockCameraPosition = false;
             playerManager.playerComponentManager.EnablePlayerControl();
             cursorManager.HideCursor();
+            uIDocumentPlayerHUDV2.ShowHUD();
         }
 
         public void CloseMenuTabs()
@@ -251,6 +253,11 @@ namespace AF
             }
 
             if (playerManager.IsBusy())
+            {
+                return false;
+            }
+
+            if (uIManager.displayedUis.Count > 0)
             {
                 return false;
             }

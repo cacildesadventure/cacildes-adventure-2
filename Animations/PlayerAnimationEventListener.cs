@@ -313,5 +313,10 @@ namespace AF.Animations
         public void HideRifleWeapon()
         {
         }
+
+        public void OnPushObject()
+        {
+            playerManager.pushObjectManager.OnPushObject();
+        }
     }
 }

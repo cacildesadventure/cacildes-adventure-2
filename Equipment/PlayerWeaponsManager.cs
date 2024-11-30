@@ -42,8 +42,6 @@ namespace AF.Equipment
         public LocalizedString CanNotApplyBuffToThisWeapon;
         // "Weapon is already buffed"
         public LocalizedString WeaponIsAlreadyBuffed;
-        // "Not enough mana to use weapon special"
-        public LocalizedString NotEnoughManaToUseWeaponSpecial;
 
         private void Awake()
         {

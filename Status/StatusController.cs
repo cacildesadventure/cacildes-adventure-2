@@ -45,6 +45,11 @@ namespace AF.StatusEffects
         [Header("Optional Components")]
         public UIDocumentStatusEffectApplied uIDocumentStatusEffectApplied;
 
+        [Header("Settings")]
+        // This should be generic, not belong to the status effect
+        public float decreaseRateWithDamage = 1f;
+        public float decreaseRateWithoutDamage = 5f;
+
         private void Awake()
         {
             onAwake?.Invoke();
@@ -201,8 +206,8 @@ namespace AF.StatusEffects
             {
 
                 entry.currentAmount -= (entry.hasReachedTotalAmount
-                    ? entry.statusEffect.decreaseRateWithDamage
-                    : entry.statusEffect.decreaseRateWithoutDamage) * Time.deltaTime;
+                    ? decreaseRateWithDamage
+                    : decreaseRateWithoutDamage) * Time.deltaTime;
 
                 if (statusEffectUI != null && statusEffectUI.Value != null)
                 {
@@ -247,7 +252,7 @@ namespace AF.StatusEffects
             return true;
         }
 
-        public void RemoveAppliedStatus(AppliedStatusEffect appliedStatus)
+        void RemoveAppliedStatus(AppliedStatusEffect appliedStatus)
         {
             if (appliedStatus == null || appliedStatusEffects.Contains(appliedStatus) == false)
             {
@@ -335,6 +340,5 @@ namespace AF.StatusEffects
 
             return amount;
         }
-
     }
 }

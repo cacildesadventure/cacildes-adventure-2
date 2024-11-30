@@ -44,7 +44,7 @@ namespace AF
 
         void SetupRefs()
         {
-            healthContainer = uIDocumentPlayerHUDV2.root.Q<VisualElement>("Health");
+            healthContainer = uIDocumentPlayerHUDV2.uIDocument.rootVisualElement.Q<VisualElement>("Health");
             healthFill = healthContainer.Q<VisualElement>("Fill");
             healthFillDelay = healthContainer.Q<VisualElement>("FillDelay");
             isSetup = true;

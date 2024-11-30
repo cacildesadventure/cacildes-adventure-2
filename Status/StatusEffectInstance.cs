@@ -17,8 +17,5 @@ namespace AF
         public UnityEvent onApplied_Update;
         public UnityEvent onApplied_End;
 
-
-
-
     }
 }

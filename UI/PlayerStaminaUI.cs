@@ -34,7 +34,7 @@ namespace AF
 
         void SetupRefs()
         {
-            container = uIDocumentPlayerHUDV2.root.Q<VisualElement>("Stamina");
+            container = uIDocumentPlayerHUDV2.uIDocument.rootVisualElement.Q<VisualElement>("Stamina");
             fill = container.Q<VisualElement>("Fill");
             isSetup = true;
         }

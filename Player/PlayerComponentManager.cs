@@ -1,16 +1,11 @@
-using UnityEngine;
-
 namespace AF
 {
+    using UnityEngine;
 
     public class PlayerComponentManager : MonoBehaviour
     {
         [Header("Components")]
-        public ThirdPersonController thirdPersonController;
-        public PlayerCombatController playerCombatController;
-        public DodgeController dodgeController;
-        public PlayerBlockInput playerParryManager;
-        public CharacterController characterController;
+        public PlayerManager playerManager;
 
         public bool isInTutorial = false;
         public bool isInBonfire = false;
@@ -29,10 +24,8 @@ namespace AF
             enemyLayer = LayerMask.GetMask("Enemy");
         }
 
-        public bool PlayerMovementIsEnabled()
-        {
-            return thirdPersonController.enabled;
-        }
+        public bool PlayerMovementIsEnabled() => playerManager.thirdPersonController.enabled;
+        public bool IsBusy() => isInTutorial || isInBonfire;
 
         public void ResetStates()
         {
@@ -53,40 +46,41 @@ namespace AF
                 return;
             }
 
-            thirdPersonController.enabled = true;
-            thirdPersonController.canRotateCharacter = true;
-            thirdPersonController.canMove = true;
-            playerCombatController.enabled = true;
-            dodgeController.enabled = true;
-            playerParryManager.enabled = true;
-            thirdPersonController.SetTrackFallDamage(true);
+            playerManager.thirdPersonController.enabled = true;
+            playerManager.thirdPersonController.canRotateCharacter = true;
+            playerManager.thirdPersonController.canMove = true;
+            playerManager.playerCombatController.enabled = true;
+            playerManager.dodgeController.enabled = true;
+            playerManager.playerBlockInput.enabled = true;
+            playerManager.thirdPersonController.SetTrackFallDamage(true);
+            playerManager.eventNavigator.SetCanInteract(true);
         }
 
         public void DisableComponents()
         {
-            thirdPersonController.StopMovement();
-            thirdPersonController.canMove = false;
-            thirdPersonController.canRotateCharacter = false;
-            playerCombatController.enabled = false;
-            dodgeController.enabled = false;
-            playerParryManager.enabled = false;
-            thirdPersonController.SetTrackFallDamage(false);
+            playerManager.thirdPersonController.StopMovement();
+            playerManager.thirdPersonController.canMove = false;
+            playerManager.thirdPersonController.canRotateCharacter = false;
+            playerManager.playerCombatController.enabled = false;
+            playerManager.dodgeController.enabled = false;
+            playerManager.playerBlockInput.enabled = false;
+            playerManager.thirdPersonController.SetTrackFallDamage(false);
+            playerManager.eventNavigator.SetCanInteract(false);
         }
 
         public void DisableCharacterController()
         {
-            characterController.enabled = false;
+            playerManager.characterController.enabled = false;
         }
 
         public void EnableCharacterController()
         {
-            characterController.enabled = true;
+            playerManager.characterController.enabled = true;
         }
 
         /// <summary>
         /// Unity Event
         /// </summary>
-        /// <returns></returns>
         public void DisablePlayerControl()
         {
             DisableCharacterController();
@@ -97,70 +91,53 @@ namespace AF
         {
             DisableCharacterController();
             DisableComponents();
-
             regainControlOnResetState = true;
         }
 
         /// <summary>
         /// Unity Event
         /// </summary>
-        /// <returns></returns>
         public void EnablePlayerControl()
         {
             EnableCharacterController();
             EnableComponents();
         }
 
-        public bool IsBusy()
-        {
-            if (isInTutorial)
-            {
-                return true;
-            }
-
-            if (isInBonfire)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public void CurePlayer()
         {
-            GetComponent<PlayerHealth>().RestoreHealthPercentage(100);
-            GetComponent<StaminaStatManager>().RestoreStaminaPercentage(100);
+            playerManager.health.RestoreFullHealth();
+            playerManager.staminaStatManager.RestoreStaminaPercentage(100);
         }
 
         public void UpdatePosition(Vector3 newPosition, Quaternion newRotation)
         {
             // Store the initial state of fall damage tracking
-            bool originalTrackFallDamage = thirdPersonController.GetTrackFallDamage();
+            bool originalTrackFallDamage = playerManager.thirdPersonController.GetTrackFallDamage();
 
             // Disable fall damage tracking temporarily
-            thirdPersonController.SetTrackFallDamage(false);
+            playerManager.thirdPersonController.SetTrackFallDamage(false);
 
             // Disable character controller to avoid unintended collisions during position update
             DisableCharacterController();
 
-            characterController.transform.SetPositionAndRotation(newPosition, newRotation);
+            playerManager.characterController.transform.SetPositionAndRotation(newPosition, newRotation);
             EnableCharacterController();
 
             // Restore original fall damage tracking state
-            thirdPersonController.SetTrackFallDamage(originalTrackFallDamage);
+            playerManager.thirdPersonController.SetTrackFallDamage(originalTrackFallDamage);
         }
 
         public void EnableCollisionWithEnemies()
         {
-            if (characterController.excludeLayers != nothingLayer)
+            if (playerManager.characterController.excludeLayers != nothingLayer)
             {
-                characterController.excludeLayers = nothingLayer;
+                playerManager.characterController.excludeLayers = nothingLayer;
             }
         }
 
         public void DisableCollisionWithEnemies()
         {
-            characterController.excludeLayers = enemyLayer;
+            playerManager.characterController.excludeLayers = enemyLayer;
         }
 
         public void TeleportPlayer(Transform target)
@@ -185,14 +162,14 @@ namespace AF
         public void LockPlayerControl()
         {
             DisableComponents();
-            thirdPersonController.enabled = false;
+            playerManager.thirdPersonController.enabled = false;
         }
 
         public void FaceObject(GameObject gameObject)
         {
-            Vector3 desiredRot = gameObject.transform.position - characterController.transform.position;
+            Vector3 desiredRot = gameObject.transform.position - playerManager.characterController.transform.position;
             desiredRot.y = 0;
-            characterController.transform.rotation = Quaternion.LookRotation(desiredRot);
+            playerManager.characterController.transform.rotation = Quaternion.LookRotation(desiredRot);
         }
     }
 }

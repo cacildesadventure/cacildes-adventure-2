@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using AYellowpaper.SerializedCollections;
 using UnityEditor;
@@ -14,6 +16,7 @@ namespace AF.Inventory
         public SerializedDictionary<Item, ItemAmount> ownedItems = new();
 
         public SerializedDictionary<Item, ItemAmount> defaultItems = new();
+        public SerializedDictionary<string, List<UserCreatedItem>> userCreatedItems = new();
 
         [Header("Databases")]
         public EquipmentDatabase equipmentDatabase;
@@ -72,6 +75,61 @@ namespace AF.Inventory
             }
         }
 
+        public void AddUserCreatedItem(UserCreatedItem userCreatedItem)
+        {
+            if (userCreatedItems.ContainsKey(userCreatedItem.itemName))
+            {
+                userCreatedItems[userCreatedItem.itemName].Add(userCreatedItem);
+            }
+            else
+            {
+                userCreatedItems.Add(userCreatedItem.itemName, new() { userCreatedItem });
+            }
+
+            // Look up to a entry in owned items with the same user created item name
+            Item matchedEntry = ownedItems.FirstOrDefault(ownedItem => ownedItem.Key.name == userCreatedItem.itemName).Key;
+
+            if (matchedEntry != null)
+            {
+                AddItem(matchedEntry, 1);
+                return;
+            }
+
+            Consumable consumable = CreateInstance<Consumable>();
+            consumable.value = userCreatedItem.value;
+            consumable.sprite = userCreatedItem.itemThumbnail;
+            consumable.name = userCreatedItem.itemName;
+
+            var statusEffectsWhenConsumed = new List<StatusEffect>();
+            statusEffectsWhenConsumed.AddRange(userCreatedItem.positiveEffects);
+            statusEffectsWhenConsumed.AddRange(userCreatedItem.negativeEffects);
+            consumable.statusEffectsWhenConsumed = statusEffectsWhenConsumed.ToArray();
+
+            AddItem(consumable, 1);
+        }
+
+        public void RemoveUserCreatedItem(Item item)
+        {
+            if (!userCreatedItems.ContainsKey(item.name))
+            {
+                return;
+            }
+
+            if (userCreatedItems[item.name].Count <= 1)
+            {
+                userCreatedItems.Remove(item.name);
+            }
+            else
+            {
+                userCreatedItems[item.name].RemoveRange(0, 1);
+            }
+        }
+
+        public bool IsUserCreatedItem(Item item)
+        {
+            return userCreatedItems.ContainsKey(item.name);
+        }
+
         public void AddItem(Item itemToAdd)
         {
             AddItem(itemToAdd, 1);
@@ -79,7 +137,6 @@ namespace AF.Inventory
 
         public void AddItem(Item itemToAdd, int quantity)
         {
-
             if (HasItem(itemToAdd))
             {
                 ownedItems[itemToAdd].amount += quantity;
@@ -157,6 +214,20 @@ namespace AF.Inventory
         public int GetSpellsCount()
         {
             return ownedItems.Count(x => x.Key is Spell);
+        }
+
+        public Dictionary<CraftingMaterial, ItemAmount> GetIngredients()
+        {
+            // Return an empty dictionary if there are no owned items
+            if (ownedItems.Count <= 0)
+            {
+                return new Dictionary<CraftingMaterial, ItemAmount>();
+            }
+
+            // Filter the owned items where the key is of type CraftingMaterial and return as a dictionary
+            return ownedItems
+                .Where(x => x.Key is CraftingMaterial)
+                .ToDictionary(x => (CraftingMaterial)x.Key, x => x.Value);
         }
     }
 }

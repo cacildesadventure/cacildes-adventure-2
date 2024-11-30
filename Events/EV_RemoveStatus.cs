@@ -1,7 +1,6 @@
-using System.Collections;
-
 namespace AF
 {
+    using System.Collections;
 
     public class EV_RemoveStatus : EventBase
     {
@@ -21,7 +20,6 @@ namespace AF
             yield return null;
         }
 
-
         PlayerManager GetPlayerManager()
         {
             if (_playerManager == null)
@@ -32,5 +30,4 @@ namespace AF
             return _playerManager;
         }
     }
-
 }

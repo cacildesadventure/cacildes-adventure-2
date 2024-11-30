@@ -21,6 +21,7 @@ namespace AF
         public ActionButton returnToSettingsButton;
 
         [Header("Key Rebinding")]
+        public ControlsHUD controlsHUD;
         VisualElement pressAnyKeyModal;
         public StarterAssetsInputs inputs;
 
@@ -124,6 +125,8 @@ namespace AF
             pressAnyKeyModal.style.display = DisplayStyle.None;
 
             onFinish?.Invoke();
+
+            controlsHUD.UpdateUI();
         }
 
         void UpdateUI()

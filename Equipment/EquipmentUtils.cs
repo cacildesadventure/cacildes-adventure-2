@@ -10,6 +10,7 @@ namespace AF
     {
 
         public enum AttributeType { VITALITY, ENDURANCE, DEXTERITY, STRENGTH, INTELLIGENCE, REPUTATION }
+        public enum AccessoryAttributeType { HEALTH_BONUS, STAMINA_BONUS, MANA_BONUS }
 
         public static int GetPoiseChangeFromItem(int playerMaxPoiseHits, EquipmentDatabase equipmentDatabase, Item itemToEquip)
         {
@@ -93,7 +94,6 @@ namespace AF
 
         public static int GetElementalDefenseFromItem(ArmorBase armorBase, WeaponElementType weaponElementType, DefenseStatManager defenseStatManager, EquipmentDatabase equipmentDatabase)
         {
-            // Get base elemental defense based on the weapon element type.
             int baseElementalDefense = weaponElementType switch
             {
                 WeaponElementType.Fire => (int)defenseStatManager.GetFireDefense(),
@@ -106,7 +106,6 @@ namespace AF
                 _ => 0
             };
 
-            // Determine the currently equipped armor based on armor type.
             ArmorBase equippedArmor = armorBase switch
             {
                 Helmet => equipmentDatabase.helmet,
@@ -117,7 +116,6 @@ namespace AF
                 _ => null
             };
 
-            // If an equipped item is found, calculate defense based on the current and equipped armor.
             int currentDefenseFromItem = 0;
             if (equippedArmor != null)
             {
@@ -134,11 +132,9 @@ namespace AF
                 };
             }
 
-            // Adjust base elemental defense with equipped item defense.
             int newValue = Math.Max(0, baseElementalDefense - currentDefenseFromItem);
 
-            // Add defense from the provided armorBase (newly equipped item).
-            int newDefenseFromItem = weaponElementType switch
+            int newDefenseFromItem = equipmentDatabase.IsEquipped(armorBase) ? 0 : weaponElementType switch
             {
                 WeaponElementType.Fire => (int)armorBase.fireDefense,
                 WeaponElementType.Frost => (int)armorBase.frostDefense,
@@ -229,7 +225,7 @@ namespace AF
             int valueFromCurrentEquipment = 0;
 
             // Retrieve bonus from armorBase
-            if (armorBase != null)
+            if (!equipmentDatabase.IsEquipped(armorBase))
             {
                 bonusFromEquipment = attributeType switch
                 {
@@ -312,6 +308,24 @@ namespace AF
                     _ => 0
                 };
             }
+            else if (armorBase is Accessory)
+            {
+                // Loop through each accessory in the accessories collection
+                foreach (var equippedAccessory in equipmentDatabase.accessories)
+                {
+                    // Switch based on the specific type of attribute for the accessory
+                    valueFromCurrentEquipment += attributeType switch
+                    {
+                        AttributeType.VITALITY => equippedAccessory?.vitalityBonus ?? 0,
+                        AttributeType.ENDURANCE => equippedAccessory?.enduranceBonus ?? 0,
+                        AttributeType.STRENGTH => equippedAccessory?.strengthBonus ?? 0,
+                        AttributeType.DEXTERITY => equippedAccessory?.dexterityBonus ?? 0,
+                        AttributeType.INTELLIGENCE => equippedAccessory?.intelligenceBonus ?? 0,
+                        AttributeType.REPUTATION => equippedAccessory?.reputationBonus ?? 0,
+                        _ => 0
+                    };
+                }
+            }
 
             // Adjust current value by the bonuses
             currentValue = Math.Max(0, currentValue - valueFromCurrentEquipment); // Ensure non-negative
@@ -370,5 +384,50 @@ namespace AF
             return currentValue + bonusFromEquipment;
         }
 
+
+        public static int GetAttributeFromAccessory(Accessory accessory, AccessoryAttributeType attributeType, PlayerManager playerManager, EquipmentDatabase equipmentDatabase)
+        {
+            // Get current value based on attribute type
+            int currentValue = attributeType switch
+            {
+                AccessoryAttributeType.HEALTH_BONUS => playerManager.health.GetMaxHealth(),
+                AccessoryAttributeType.STAMINA_BONUS => playerManager.staminaStatManager.GetMaxStamina(),
+                AccessoryAttributeType.MANA_BONUS => playerManager.manaManager.GetMaxMana(),
+                _ => 0 // Fallback for safety
+            };
+
+            // Determine bonus from the accessory and currently equipped item
+            int bonusFromEquipment = 0;
+            int valueFromCurrentEquipment = 0;
+
+            // Retrieve bonus from accessory if not equipped
+            if (accessory != null && !equipmentDatabase.accessories.Contains(accessory))
+            {
+                bonusFromEquipment = attributeType switch
+                {
+                    AccessoryAttributeType.HEALTH_BONUS => accessory.healthBonus,
+                    AccessoryAttributeType.STAMINA_BONUS => accessory.staminaBonus,
+                    AccessoryAttributeType.MANA_BONUS => accessory.magicBonus,
+                    _ => 0 // Fallback for safety
+                };
+            }
+
+            // Loop through each accessory in the accessories collection
+            foreach (var equippedAccessory in equipmentDatabase.accessories)
+            {
+                // Switch based on the specific type of attribute for the accessory
+                valueFromCurrentEquipment += attributeType switch
+                {
+                    AccessoryAttributeType.HEALTH_BONUS => equippedAccessory?.healthBonus ?? 0,
+                    AccessoryAttributeType.STAMINA_BONUS => equippedAccessory?.staminaBonus ?? 0,
+                    AccessoryAttributeType.MANA_BONUS => equippedAccessory?.magicBonus ?? 0,
+                    _ => 0
+                };
+            }
+
+            // Adjust current value by the bonuses
+            currentValue = Math.Max(0, currentValue - valueFromCurrentEquipment); // Ensure non-negative
+            return currentValue + bonusFromEquipment;
+        }
     }
 }

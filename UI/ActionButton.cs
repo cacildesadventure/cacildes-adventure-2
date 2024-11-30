@@ -38,36 +38,6 @@ namespace AF.UI
         [Header("Label")]
         public LocalizedString description;
 
-        string GetRebindedKey(StarterAssetsInputs starterAssetsInputs)
-        {
-            InputAction inputAction = starterAssetsInputs.playerInput
-                .actions
-                .FindAction(actionName);
-
-            if (inputAction == null)
-            {
-                return "";
-            }
-
-            string value = "";
-
-            InputBinding[] inputBindings = inputAction.bindings.Where(binding => binding.path.Contains("Keyboard")).ToArray();
-
-            for (int i = 0; i < inputBindings.Length; i++)
-            {
-                // Extract the path, removing "<Keyboard>/"
-                value += inputBindings[i].path.Replace("<Keyboard>/", "");
-
-                // Add the separator (", ") if it's not the last element
-                if (i < inputBindings.Length - 1)
-                {
-                    value += ", ";  // or any separator you want to use
-                }
-            }
-            return value;
-        }
-
-
         // Main method that coordinates the creation of the key VisualElement
         public VisualElement GetKey(StarterAssetsInputs starterAssetsInputs)
         {
@@ -126,12 +96,16 @@ namespace AF.UI
             background.style.height = 24;
             background.style.unityBackgroundImageTintColor = keyboardBackgroundColor;
 
-            Label keyLabel = new Label(GetRebindedKey(starterAssetsInputs));
+            string rebindedKey = starterAssetsInputs.GetCurrentKeyBindingForAction(actionName);
+            Label keyLabel = new Label(rebindedKey);
             keyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             keyLabel.style.fontSize = 20;
             keyLabel.style.color = Color.white;
             keyLabel.style.unityFontDefinition = new StyleFontDefinition(font);
-            keyLabel.style.marginTop = -3;
+            keyLabel.style.marginTop = 0;
+            keyLabel.style.marginRight = 0;
+            keyLabel.style.marginBottom = 0;
+            keyLabel.style.marginLeft = 0;
 
             if (!string.IsNullOrEmpty(overrideKeyName))
             {
@@ -187,6 +161,14 @@ namespace AF.UI
             descriptionLabel.style.unityFontDefinition = new StyleFontDefinition(font);
             descriptionLabel.text = description.GetLocalizedString();
             descriptionLabel.style.flexShrink = 0;
+
+            // Applying text shadow
+            descriptionLabel.style.textShadow = new TextShadow
+            {
+                offset = new Vector2(2, 2),      // Offset for the shadow (X and Y)
+                color = new Color(0, 0, 0, 0.5f), // Shadow color (black with 50% opacity)
+                blurRadius = 1                   // Optional: blur radius for the shadow
+            };
 
             return descriptionLabel;
         }

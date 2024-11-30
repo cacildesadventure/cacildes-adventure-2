@@ -35,7 +35,7 @@ namespace AF
         public bool displaySceneName = true;
         public float displaySceneNameDelay = 3f;
         public float displaySceneNameDuration = 3f;
-        public string sceneName = "";
+        public Location location;
         public UIDocument sceneNameDocument;
         public AudioClip sceneNameSfx;
 
@@ -55,11 +55,6 @@ namespace AF
             sceneNameDocument.rootVisualElement.contentContainer.style.opacity = 0;
 
             onSceneStart?.Invoke();
-
-            if (string.IsNullOrEmpty(sceneName))
-            {
-                sceneName = SceneManager.GetActiveScene().name;
-            }
         }
 
         private void Start()
@@ -96,7 +91,7 @@ namespace AF
         {
             yield return new WaitForSeconds(displaySceneNameDelay);
 
-            sceneNameDocument.rootVisualElement.Q<Label>().text = sceneName;
+            sceneNameDocument.rootVisualElement.Q<Label>().text = location.GetLocationDisplayName();
 
             DOTween.To(
                   () => sceneNameDocument.rootVisualElement.contentContainer.style.opacity.value,

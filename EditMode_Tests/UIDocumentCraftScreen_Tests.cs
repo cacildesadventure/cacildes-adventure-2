@@ -1,12 +1,11 @@
-using AF.Inventory;
-using NUnit.Framework;
-using UnityEngine;
-
 namespace AF.Tests
 {
+    using AF.Inventory;
+    using NUnit.Framework;
+    using UnityEngine;
+
     public class UIDocumentCraftScreenTests
     {
-
         UIDocumentCraftScreen uIDocumentCraftScreen;
 
         InventoryDatabase inventoryDatabase;
@@ -23,7 +22,7 @@ namespace AF.Tests
             playerManager = new GameObject().AddComponent<PlayerManager>();
             playerManager.playerStatsDatabase = playerStatsDatabase;
             playerManager.playerComponentManager = new GameObject().AddComponent<PlayerComponentManager>();
-            playerManager.playerComponentManager.characterController = new GameObject().AddComponent<CharacterController>();
+            playerManager.characterController = new GameObject().AddComponent<CharacterController>();
 
             uIDocumentCraftScreen = new GameObject().AddComponent<UIDocumentCraftScreen>();
             uIDocumentCraftScreen.cursorManager = uIDocumentCraftScreen.gameObject.AddComponent<CursorManager>();

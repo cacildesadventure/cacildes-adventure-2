@@ -16,6 +16,9 @@ namespace AF
 
         public UnityAction onTwoHandingModeChanged;
 
+        [Header("Two Hand Unarmed Animations")]
+        public Weapon twoHandUnarmedWeapon;
+
         private void Awake()
         {
             UpdateTwoHandingMode();

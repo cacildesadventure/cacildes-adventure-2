@@ -52,8 +52,10 @@ namespace AF
 
         public int GetMaxMana()
         {
-            return playerStatsDatabase.maxMana + playerStatsBonusController.magicBonus + Mathf.RoundToInt((
-                playerStatsDatabase.intelligence + playerStatsBonusController.intelligenceBonus) * playerStatsDatabase.levelMultiplierForMana);
+            return Formulas.CalculateStatForLevel(
+                 playerStatsDatabase.maxMana + playerStatsBonusController.magicBonus,
+                 playerStatsBonusController.GetCurrentIntelligence(),
+                 playerStatsDatabase.levelMultiplierForMana);
         }
 
         public void DecreaseMana(float amount)

@@ -65,7 +65,7 @@ namespace AF
             Consumable consumableItem = currentItem as Consumable;
             playerManager.playerInventory.PrepareItemForConsuming(consumableItem);
 
-            uIDocumentPlayerHUDV2.UpdateEquipment();
+            uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace AF
 
             equipmentDatabase.SwitchToNextWeapon();
 
-            uIDocumentPlayerHUDV2.OnSwitchWeapon();
+            uIDocumentPlayerHUDV2.equipmentHUD.OnSwitchWeapon();
 
             UpdateCanSwitchFlag();
         }
@@ -97,7 +97,7 @@ namespace AF
 
             equipmentDatabase.SwitchToNextShield();
 
-            uIDocumentPlayerHUDV2.OnSwitchShield();
+            uIDocumentPlayerHUDV2.equipmentHUD.OnSwitchShield();
 
             UpdateCanSwitchFlag();
         }
@@ -114,7 +114,7 @@ namespace AF
 
             equipmentDatabase.SwitchToNextConsumable();
 
-            uIDocumentPlayerHUDV2.OnSwitchConsumable();
+            uIDocumentPlayerHUDV2.equipmentHUD.OnSwitchConsumable();
             UpdateCanSwitchFlag();
         }
 
@@ -137,7 +137,7 @@ namespace AF
                 equipmentDatabase.SwitchToNextSpell();
             }
 
-            uIDocumentPlayerHUDV2.OnSwitchSpell();
+            uIDocumentPlayerHUDV2.equipmentHUD.OnSwitchSpell();
             UpdateCanSwitchFlag();
         }
 

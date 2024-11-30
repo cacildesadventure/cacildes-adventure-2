@@ -13,11 +13,8 @@ namespace AF
         public UnityEvent onActivate;
 
         [Header("Prompt")]
-        public string key = "E";
         public string action = "Pickup";
 
-        // Scene Refs
-        UIDocumentKeyPrompt uIDocumentKeyPrompt;
 
         [Header("Alchemy Pickable Info")]
         public Item item;
@@ -28,6 +25,9 @@ namespace AF
 
         bool canInteract = true;
 
+        // Scene Refs
+        UIDocumentKeyPrompt _uIDocumentKeyPrompt;
+        Soundbank _soundbank;
         public void OnCaptured()
         {
             if (!canInteract)
@@ -35,7 +35,7 @@ namespace AF
                 return;
             }
 
-            GetUIDocumentKeyPrompt().DisplayPrompt(key, action, item);
+            GetUIDocumentKeyPrompt().DisplayPrompt(action);
         }
 
         public void OnInvoked()
@@ -77,17 +77,6 @@ namespace AF
             canInteract = false;
             //this.gameObject.layer = 0;
         }
-
-        UIDocumentKeyPrompt GetUIDocumentKeyPrompt()
-        {
-            if (uIDocumentKeyPrompt == null)
-            {
-                uIDocumentKeyPrompt = FindAnyObjectByType<UIDocumentKeyPrompt>(FindObjectsInactive.Include);
-            }
-
-            return uIDocumentKeyPrompt;
-        }
-
         public void HandleActivation()
         {
             bool canActivate = true;
@@ -110,11 +99,34 @@ namespace AF
             {
                 onActivate?.Invoke();
             }
+
+            GetSoundbank().PlaySound(GetSoundbank().uiDecision);
         }
+
+        UIDocumentKeyPrompt GetUIDocumentKeyPrompt()
+        {
+            if (_uIDocumentKeyPrompt == null)
+            {
+                _uIDocumentKeyPrompt = FindAnyObjectByType<UIDocumentKeyPrompt>(FindObjectsInactive.Include);
+            }
+
+            return _uIDocumentKeyPrompt;
+        }
+
 
         NotificationManager GetNotificationManager()
         {
             return FindAnyObjectByType<NotificationManager>(FindObjectsInactive.Include);
         }
+        Soundbank GetSoundbank()
+        {
+            if (_soundbank == null)
+            {
+                _soundbank = FindAnyObjectByType<Soundbank>(FindObjectsInactive.Include);
+            }
+
+            return _soundbank;
+        }
+
     }
 }

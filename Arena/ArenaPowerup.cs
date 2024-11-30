@@ -51,7 +51,7 @@ namespace AF.Arena
                     }
 
                     FindAnyObjectByType<NotificationManager>(FindObjectsInactive.Include).ShowNotification(
-                        character.name + " " + hasPickedPowereUp_LocalizedString.GetLocalizedString() + " " + chosenStatusEffect.appliedName, null);
+                        character.name + " " + hasPickedPowereUp_LocalizedString.GetLocalizedString() + " " + chosenStatusEffect.GetAppliedName(), null);
 
                     character.statusController.InflictStatusEffect(
                         chosenStatusEffect, statusEffectDuration, true);

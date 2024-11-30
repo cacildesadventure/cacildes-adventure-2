@@ -1,18 +1,18 @@
-using System.Collections;
-using AF.Bonfires;
-using AF.Inventory;
-using UnityEngine;
-using UnityEngine.UIElements;
-
 namespace AF
 {
+    using System.Collections;
+    using AF.Bonfires;
+    using AF.UI;
+    using UnityEngine;
+    using UnityEngine.Localization.Settings;
+    using UnityEngine.UIElements;
+
     public class UIDocumentBonfireMenu : MonoBehaviour
     {
         [Header("UI Components")]
         public UIDocument uIDocument;
         public UIDocumentLevelUp uiDocumentLevelUp;
         public UIDocumentBonfireTravel uiDocumentTravel;
-        public UIDocumentCraftScreen uIDocumentCraftScreen;
 
         [Header("Components")]
         public CursorManager cursorManager;
@@ -20,17 +20,20 @@ namespace AF
         public Soundbank soundbank;
 
         [Header("Databases")]
-        public InventoryDatabase inventoryDatabase;
         public PlayerStatsDatabase playerStatsDatabase;
 
         [Header("References")]
-        public Item blacksmithKit;
-        public Item alchemyKit;
         public GameSession gameSession;
+
+        [Header("Footer")]
+        public MenuFooter menuFooter;
+
+        public ActionButton confirmButton, exitMenuButton;
+        public StarterAssetsInputs starterAssetsInputs;
 
         [Header("UI Elements")]
         VisualElement root;
-        Button levelUpButton, passTimeButton, exitBonfireButton, travelButton, upgradeWeapons, brewPotions;
+        Button levelUpButton, passTimeButton, exitBonfireButton, travelButton;
         Label bonfireName, bonfireNameLabelUI, canLevelUpIndicator, currentGoldAndRequiredLabel, goldAndRequiredForNextLevel;
 
         // Flags
@@ -61,8 +64,10 @@ namespace AF
             passTimeButton = root.Q<Button>("PassTimeButton");
             exitBonfireButton = root.Q<Button>("LeaveButton");
             travelButton = root.Q<Button>("TravelButton");
-            upgradeWeapons = root.Q<Button>("UpgradeWeapons");
-            brewPotions = root.Q<Button>("BrewPotions");
+
+
+            menuFooter.SetupReferences();
+            SetupFooterActions();
         }
 
         private void OnEnable()
@@ -71,6 +76,7 @@ namespace AF
             SetupRefs();
             DrawUI();
             Invoke(nameof(ResetCanEscapeFlag), 0.5f);
+            playerManager.uIDocumentPlayerHUDV2.HideHUD();
         }
 
         void ResetCanEscapeFlag()
@@ -102,8 +108,6 @@ namespace AF
         {
             canLevelUpIndicator.text = hasEnoughForLevellingUp ? " *" : "";
 
-            upgradeWeapons.style.display = inventoryDatabase.HasItem(blacksmithKit) ? DisplayStyle.Flex : DisplayStyle.None;
-            brewPotions.style.display = inventoryDatabase.HasItem(alchemyKit) ? DisplayStyle.Flex : DisplayStyle.None;
             SetButtonTexts();
             RegisterButtonCallbacks();
 
@@ -119,46 +123,60 @@ namespace AF
 
         void RegisterButtonCallbacks()
         {
+            UIUtils.SetupButton(exitBonfireButton, () =>
+            {
+                ExitBonfire();
+            },
+            () =>
+            {
+                menuFooter.DisplayTooltip(GetReturnTooltip());
+            },
+            () =>
+            {
+                menuFooter.HideTooltip();
+            }, true, soundbank);
+
             UIUtils.SetupButton(levelUpButton, () =>
             {
                 uiDocumentLevelUp.gameObject.SetActive(true);
                 gameObject.SetActive(false);
-            }, soundbank);
+            },
+            () =>
+            {
+                menuFooter.DisplayTooltip(GetLevelupTooltip());
+            },
+            () =>
+            {
+                menuFooter.HideTooltip();
+            }, true, soundbank);
 
             UIUtils.SetupButton(passTimeButton, () =>
             {
                 if (!isPassingTime)
                     StartCoroutine(MoveTime());
-            }, soundbank);
+            },
+            () =>
+            {
+                menuFooter.DisplayTooltip(GetWait1HourTooltip());
+            },
+            () =>
+            {
+                menuFooter.HideTooltip();
+            }, true, soundbank);
 
             UIUtils.SetupButton(travelButton, () =>
             {
                 uiDocumentTravel.gameObject.SetActive(true);
                 this.gameObject.SetActive(false);
-            }, soundbank);
-
-            UIUtils.SetupButton(upgradeWeapons, () =>
+            },
+            () =>
             {
-                uIDocumentCraftScreen.craftActivity = UIDocumentCraftScreen.CraftActivity.BLACKSMITH;
-                uIDocumentCraftScreen.returnToBonfire = true;
-
-                uIDocumentCraftScreen.gameObject.SetActive(true);
-                this.gameObject.SetActive(false);
-            }, soundbank);
-
-            UIUtils.SetupButton(brewPotions, () =>
+                menuFooter.DisplayTooltip(GetTravelTooltip());
+            },
+            () =>
             {
-                uIDocumentCraftScreen.craftActivity = UIDocumentCraftScreen.CraftActivity.ALCHEMY;
-                uIDocumentCraftScreen.returnToBonfire = true;
-
-                uIDocumentCraftScreen.gameObject.SetActive(true);
-                this.gameObject.SetActive(false);
-            }, soundbank);
-
-            UIUtils.SetupButton(exitBonfireButton, () =>
-            {
-                ExitBonfire();
-            }, soundbank);
+                menuFooter.HideTooltip();
+            }, true, soundbank);
         }
 
         /// <summary>
@@ -173,7 +191,6 @@ namespace AF
 
             if (uiDocumentLevelUp.isActiveAndEnabled == false
                 && uiDocumentTravel.isActiveAndEnabled == false
-                && uIDocumentCraftScreen.isActiveAndEnabled == false
                 )
             {
                 ExitBonfire();
@@ -186,6 +203,7 @@ namespace AF
             gameSession.daySpeed = originalDaySpeed;
             currentBonfire.ExitBonfire();
             currentBonfire = null;
+            playerManager.uIDocumentPlayerHUDV2.ShowHUD();
         }
 
         IEnumerator MoveTime()
@@ -211,5 +229,52 @@ namespace AF
                 isPassingTime = false;
             }
         }
+
+
+        void SetupFooterActions()
+        {
+            menuFooter.GetFooterActionsContainer().Add(confirmButton.GetKey(starterAssetsInputs));
+            menuFooter.GetFooterActionsContainer().Add(exitMenuButton.GetKey(starterAssetsInputs));
+        }
+
+        string GetReturnTooltip()
+        {
+            if (LocalizationSettings.SelectedLocale.Identifier.Code == "pt")
+            {
+                return "Sair da fogueira e continua a tua aventura";
+            }
+
+            return "Exit bonfire and resume your adventure";
+        }
+        string GetLevelupTooltip()
+        {
+            if (LocalizationSettings.SelectedLocale.Identifier.Code == "pt")
+            {
+                return "Usa o teu ouro para subir de nível";
+            }
+
+            return "Use your gold to level up";
+        }
+        string GetWait1HourTooltip()
+        {
+            if (LocalizationSettings.SelectedLocale.Identifier.Code == "pt")
+            {
+                return "Esperar uma hora";
+            }
+
+            return "Wait one hour";
+        }
+
+        string GetTravelTooltip()
+        {
+            if (LocalizationSettings.SelectedLocale.Identifier.Code == "pt")
+            {
+                return "Viajar para outra fogueira";
+            }
+
+            return "Fast-travel to another bonfire";
+        }
+
+
     }
 }

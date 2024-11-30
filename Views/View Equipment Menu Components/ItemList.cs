@@ -1,14 +1,11 @@
 
-namespace AF.UI.EquipmentMenu
+namespace AF
 {
     using System.Collections.Generic;
     using System.Linq;
-    using AF.Equipment;
     using AF.Inventory;
-    using AF.Stats;
-    using AYellowpaper.SerializedCollections;
+    using AF.UI.EquipmentMenu;
     using UnityEngine;
-    using UnityEngine.InputSystem;
     using UnityEngine.Localization.Settings;
     using UnityEngine.UIElements;
 
@@ -30,8 +27,6 @@ namespace AF.UI.EquipmentMenu
         }
 
         ScrollView itemsScrollView;
-
-        Label menuLabel;
 
         public const string SCROLL_ITEMS_LIST = "ItemsList";
 
@@ -60,8 +55,6 @@ namespace AF.UI.EquipmentMenu
 
         [HideInInspector] public bool shouldRerender = true;
 
-        VisualElement itemListKeyHints, itemListGamepadHints, equipItemKeyHint, equipItemButtonHint, useItemKeyHint, useItemButtonHint;
-
         int lastScrollElementIndex = -1;
 
         public NotificationManager notificationManager;
@@ -78,8 +71,6 @@ namespace AF.UI.EquipmentMenu
 
             returnButton.transform.scale = new Vector3(1, 1, 1);
             root.Q<VisualElement>("ItemList").style.display = DisplayStyle.Flex;
-            itemListKeyHints.style.display = DisplayStyle.None;
-            itemListGamepadHints.style.display = DisplayStyle.None;
         }
 
         private void OnDisable()
@@ -102,7 +93,6 @@ namespace AF.UI.EquipmentMenu
         public void SetupRefs()
         {
             root = uIDocument.rootVisualElement;
-            menuLabel = root.Q<Label>("MenuLabel");
 
             returnButton = root.Q<Button>("ReturnButton");
             UIUtils.SetupButton(returnButton, () =>
@@ -111,117 +101,60 @@ namespace AF.UI.EquipmentMenu
             }, soundbank);
 
             itemsScrollView = root.Q<ScrollView>(SCROLL_ITEMS_LIST);
-            itemListKeyHints = root.Q<VisualElement>("ItemListKeyboardHints");
-            itemListGamepadHints = root.Q<VisualElement>("ItemListGamepadHints");
-            equipItemKeyHint = itemListKeyHints.Q<VisualElement>("EquipItemKeyHint");
-            equipItemButtonHint = itemListGamepadHints.Q<VisualElement>("EquipItemButtonHint");
-            useItemKeyHint = itemListKeyHints.Q<VisualElement>("UseItemKeyHint");
-            useItemButtonHint = itemListGamepadHints.Q<VisualElement>("UseItemButtonHint");
+            UIUtils.SetupSlider(itemsScrollView);
         }
 
         public void ReturnToEquipmentSlots()
         {
-            itemListKeyHints.style.display = DisplayStyle.None;
-            itemListGamepadHints.style.display = DisplayStyle.None;
-
             equipmentSlots.gameObject.SetActive(true);
             this.gameObject.SetActive(false);
         }
 
-        void ShowEquipmentHint()
-        {
-            if (Gamepad.current == null) equipItemKeyHint.style.display = DisplayStyle.Flex;
-            else equipItemButtonHint.style.display = DisplayStyle.Flex;
-        }
-
-        void ShowUseItemHint()
-        {
-            if (Gamepad.current == null) useItemKeyHint.style.display = DisplayStyle.Flex;
-            else useItemButtonHint.style.display = DisplayStyle.Flex;
-        }
-
         public void DrawUI(EquipmentType equipmentType, int slotIndex)
         {
-            menuLabel.style.display = DisplayStyle.None;
-            equipItemKeyHint.style.display = DisplayStyle.None;
-            equipItemButtonHint.style.display = DisplayStyle.None;
-            useItemKeyHint.style.display = DisplayStyle.None;
-            useItemButtonHint.style.display = DisplayStyle.None;
-
-            if (Gamepad.current == null)
-            {
-                itemListKeyHints.style.display = DisplayStyle.Flex;
-            }
-            else
-            {
-                itemListGamepadHints.style.display = DisplayStyle.Flex;
-            }
 
             if (equipmentType == EquipmentType.WEAPON)
             {
-                ShowEquipmentHint();
                 PopulateScrollView<Weapon>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.SHIELD)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Shield>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.ARROW)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Arrow>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.SPELL)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Spell>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.HELMET)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Helmet>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.ARMOR)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Armor>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.GAUNTLET)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Gauntlet>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.BOOTS)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Legwear>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.ACCESSORIES)
             {
-                ShowEquipmentHint();
-
                 PopulateScrollView<Accessory>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.CONSUMABLES)
             {
-                ShowEquipmentHint();
-
-                ShowUseItemHint();
-
                 PopulateScrollView<Consumable>(false, slotIndex);
             }
             else if (equipmentType == EquipmentType.OTHER_ITEMS)
             {
-                ShowUseItemHint();
-
                 PopulateScrollView<Item>(true, slotIndex);
             }
 

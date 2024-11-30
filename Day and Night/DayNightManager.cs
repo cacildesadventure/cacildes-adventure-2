@@ -100,7 +100,7 @@ namespace AF
         {
             if (dayNightIcon == null || dayNightText == null)
             {
-                var root = uIDocumentPlayerHUDV2.root;
+                var root = uIDocumentPlayerHUDV2.uIDocument.rootVisualElement;
                 if (root != null)
                 {
                     dayNightIcon = root.Q<IMGUIContainer>("DayTimeIcon");
@@ -146,9 +146,9 @@ namespace AF
 
         void ShowClockText()
         {
-            if (uIDocumentPlayerHUDV2 != null && uIDocumentPlayerHUDV2.root != null && uIDocumentPlayerHUDV2.isActiveAndEnabled)
+            if (uIDocumentPlayerHUDV2 != null && uIDocumentPlayerHUDV2.uIDocument.rootVisualElement != null && uIDocumentPlayerHUDV2.isActiveAndEnabled)
             {
-                dayNightText = uIDocumentPlayerHUDV2.root.Q<VisualElement>("Clock").Q<Label>("Value");
+                dayNightText = uIDocumentPlayerHUDV2.uIDocument.rootVisualElement.Q<VisualElement>("Clock").Q<Label>("Value");
             }
 
             if (dayNightText == null)
@@ -176,9 +176,9 @@ namespace AF
 
         void ShowClockIcon()
         {
-            if (uIDocumentPlayerHUDV2.isActiveAndEnabled && uIDocumentPlayerHUDV2 != null && uIDocumentPlayerHUDV2.root != null)
+            if (uIDocumentPlayerHUDV2.isActiveAndEnabled && uIDocumentPlayerHUDV2 != null && uIDocumentPlayerHUDV2.uIDocument.rootVisualElement != null)
             {
-                dayNightIcon = uIDocumentPlayerHUDV2.root.Q<IMGUIContainer>("DayTimeIcon");
+                dayNightIcon = uIDocumentPlayerHUDV2.uIDocument.rootVisualElement.Q<IMGUIContainer>("DayTimeIcon");
             }
 
             if (dayNightIcon == null)

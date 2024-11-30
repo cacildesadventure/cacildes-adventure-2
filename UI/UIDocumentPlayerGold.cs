@@ -33,6 +33,8 @@ namespace AF
         [Header("Localization")]
         public LocalizedString gold_LocalizedString;
 
+        Coroutine CloseCoroutine;
+
         private void Awake()
         {
             this.gameObject.SetActive(false);
@@ -150,6 +152,18 @@ namespace AF
             {
                 counterEnabled = false;
                 goldReceived.text = "";
+
+                if (CloseCoroutine != null)
+                {
+                    StopCoroutine(CloseCoroutine);
+                }
+
+                CloseCoroutine = StartCoroutine(Close_Coroutine());
+            }
+
+            IEnumerator Close_Coroutine()
+            {
+                yield return new WaitForSeconds(1f);
                 this.gameObject.SetActive(false);
             }
         }

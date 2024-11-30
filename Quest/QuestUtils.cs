@@ -61,9 +61,9 @@ namespace AF
                     continue;
                 }
 
-                foreach (KeyValuePair<string, string> teleport in currentSceneInstance.teleports)
+                foreach (KeyValuePair<Location, string> teleport in currentSceneInstance.teleports)
                 {
-                    string nextDestination = teleport.Key;
+                    string nextDestination = teleport.Key.name;
 
                     // If visited scene already, skip
                     if (visitedScenes.ContainsKey(nextDestination))
@@ -99,7 +99,9 @@ namespace AF
                 string fromScene = previousScene[currentScene];
 
                 SceneTeleport match = sceneTeleports.FirstOrDefault(
-                    sceneTeleport => sceneTeleport.name == fromScene && sceneTeleport.teleports.ContainsKey(currentScene));
+                    sceneTeleport =>
+                        sceneTeleport.name == fromScene
+                        && sceneTeleport.teleports.Any(entry => entry.Key.name == currentScene));
 
                 if (match != null)
                 {

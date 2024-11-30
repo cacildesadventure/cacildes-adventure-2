@@ -1,35 +1,40 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
-using DG.Tweening;
-
 namespace AF
 {
+    using UnityEngine;
+    using UnityEngine.UIElements;
+    using DG.Tweening;
+    using AF.UI;
+
     public class UIDocumentKeyPrompt : MonoBehaviour
     {
         public UIDocument uiDocument => GetComponent<UIDocument>();
 
         [Header("Components")]
         public Soundbank soundbank;
+        public StarterAssetsInputs starterAssetsInputs;
+        public ActionButton interactButton;
 
-        [Header("Alchemy Info")]
-        public RecipesDatabase recipesDatabase;
+        VisualElement root;
+        VisualElement actionButtonContainer;
 
         private void Awake()
         {
             gameObject.SetActive(false);
         }
 
-        public void DisplayPrompt(string key, string action)
-        {
-            DisplayPrompt(key, action, null);
-        }
-
-        public void DisplayPrompt(string key, string action, Item item)
+        public void DisplayPrompt(string action)
         {
             this.gameObject.SetActive(true);
 
-            VisualElement root = uiDocument.rootVisualElement;
+            root = uiDocument.rootVisualElement;
+            actionButtonContainer = root.Q<VisualElement>("ActionButtonContainer");
+
+            // Clean up action button in case gamepad / keyboard input changes
+            actionButtonContainer.Clear();
+            var resultKey = interactButton.GetKey(starterAssetsInputs);
+            actionButtonContainer.Add(resultKey);
+
+            root.Q<Label>("InputText").text = action;
 
             soundbank.PlaySound(soundbank.uiHover);
 
@@ -39,46 +44,6 @@ namespace AF
                   1,
                   .25f
             );
-
-            if (Gamepad.current != null)
-            {
-                root.Q<IMGUIContainer>("KeyboardIcon").style.display = DisplayStyle.None;
-                root.Q<IMGUIContainer>("GamepadIcon").style.display = DisplayStyle.Flex;
-                root.Q<IMGUIContainer>("XboxIcon").style.display = DisplayStyle.Flex;
-            }
-            else
-            {
-                root.Q<IMGUIContainer>("KeyboardIcon").style.display = DisplayStyle.Flex;
-                root.Q<IMGUIContainer>("GamepadIcon").style.display = DisplayStyle.None;
-                root.Q<IMGUIContainer>("XboxIcon").style.display = DisplayStyle.None;
-                root.Q<IMGUIContainer>("KeyboardIcon").Q<Label>("KeyText").text = key;
-            }
-
-            root.Q<Label>("InputText").text = action;
-            root.Q<Label>("IngredientDescription").style.display = DisplayStyle.None;
-
-            if (item != null)
-            {
-                HandleAlchemyInfoTooltip(root, item);
-            }
-        }
-
-        void HandleAlchemyInfoTooltip(VisualElement root, Item item)
-        {
-            if (item == null || recipesDatabase == null)
-            {
-                return;
-            }
-
-            if (CraftingUtils.IsItemAnIngredientOfCurrentLearnedRecipes(recipesDatabase, item))
-            {
-                CraftingRecipe[] resultingRecipes = CraftingUtils.GetRecipesUsingItem(recipesDatabase, item).ToArray();
-                if (resultingRecipes != null && resultingRecipes.Length > 0)
-                {
-                    root.Q<Label>("IngredientDescription").text = CraftingUtils.GetFormattedTextForRecipesUsingItem(resultingRecipes);
-                    root.Q<Label>("IngredientDescription").style.display = DisplayStyle.Flex;
-                }
-            }
         }
     }
 }

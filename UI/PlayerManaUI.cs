@@ -34,7 +34,7 @@ namespace AF
 
         void SetupRefs()
         {
-            manaContainer = uIDocumentPlayerHUDV2.root.Q<VisualElement>("Mana");
+            manaContainer = uIDocumentPlayerHUDV2.uIDocument.rootVisualElement.Q<VisualElement>("Mana");
             manaFill = manaContainer.Q<VisualElement>("Fill");
             isSetup = true;
         }

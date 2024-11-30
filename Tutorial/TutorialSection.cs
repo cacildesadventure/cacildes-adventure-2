@@ -7,7 +7,7 @@ namespace AF.Tutorial
     {
         public UIDocumentPlayerHUDV2 uIDocumentPlayerHUDV2;
 
-        public UIDocumentPlayerHUDV2.ControlKey controlKeyToHighlight = UIDocumentPlayerHUDV2.ControlKey.None;
+        //        public UIDocumentPlayerHUDV2.ControlKey controlKeyToHighlight = UIDocumentPlayerHUDV2.ControlKey.None;
 
         public PlayerManager playerManager;
 
@@ -29,14 +29,14 @@ namespace AF.Tutorial
         {
             playerManager.playerComponentManager.TeleportPlayer(tutorialSpawnRef.transform);
 
-            if (controlKeyToHighlight != UIDocumentPlayerHUDV2.ControlKey.None)
+            /*if (controlKeyToHighlight != UIDocumentPlayerHUDV2.ControlKey.None)
             {
                 uIDocumentPlayerHUDV2.HighlightKey(controlKeyToHighlight);
             }
             else
             {
                 uIDocumentPlayerHUDV2.DisableHighlights();
-            }
+            }*/
 
             if (tutorialName.IsEmpty == false)
             {

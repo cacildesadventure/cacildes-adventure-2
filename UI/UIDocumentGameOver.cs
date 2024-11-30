@@ -19,7 +19,7 @@ namespace AF
         public PlayerStatsDatabase playerStatsDatabase;
 
         [Header("Settings")]
-        public float gameOverDuration = 2.5f;
+        float GAME_OVER_DURATION = 3.5f;
 
         [Header("You Died Texts")]
         public LocalizedString[] youDiedText;
@@ -34,6 +34,7 @@ namespace AF
         /// </summary>
         public void DisplayGameOver()
         {
+            playerManager.uIDocumentPlayerHUDV2.HideHUD();
             this.gameObject.SetActive(true);
             StartCoroutine(GameOver_Coroutine());
         }
@@ -61,7 +62,7 @@ namespace AF
 
             uIDocumentPlayerGold.LoseGold(playerStatsDatabase.gold);
 
-            yield return new WaitForSeconds(gameOverDuration);
+            yield return new WaitForSeconds(GAME_OVER_DURATION);
 
             saveManager.LoadLastSavedGame(true);
         }

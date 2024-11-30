@@ -36,8 +36,8 @@ namespace AF
         {
             VisualElement clone = statusEntryPrefab.CloneTree();
             clone.name = appliedStatusEffect.hasReachedTotalAmount
-                ? appliedStatusEffect.statusEffect.appliedName
-                : appliedStatusEffect.statusEffect.builtUpName;
+                ? appliedStatusEffect.statusEffect.GetAppliedName()
+                : appliedStatusEffect.statusEffect.GetName();
 
             clone.viewDataKey = appliedStatusEffect.statusEffect.name;
 

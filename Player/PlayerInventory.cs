@@ -38,7 +38,6 @@ namespace AF
         public Item ashes;
         public UnityEvent onDisabledAshes;
 
-
         public void ResetStates()
         {
             isConsumingItem = false;
@@ -49,7 +48,7 @@ namespace AF
         {
             inventoryDatabase.ReplenishItems();
 
-            uIDocumentPlayerHUDV2.UpdateEquipment();
+            uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
         }
 
         void HandleItemAchievements(Item item)
@@ -112,14 +111,25 @@ namespace AF
 
             inventoryDatabase.AddItem(item, quantity);
 
-            uIDocumentPlayerHUDV2.UpdateEquipment();
+            uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
         }
 
         public void RemoveItem(Item item, int quantity)
         {
             inventoryDatabase.RemoveItem(item, quantity);
 
-            uIDocumentPlayerHUDV2.UpdateEquipment();
+            if (inventoryDatabase.IsUserCreatedItem(item))
+            {
+                inventoryDatabase.RemoveUserCreatedItem(item);
+            }
+
+            uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
+        }
+
+        public void AddUserCreatedItem(UserCreatedItem userCreatedItem)
+        {
+            inventoryDatabase.AddUserCreatedItem(userCreatedItem);
+            uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
         }
 
         bool CanConsumeItem(Consumable consumable)
@@ -280,20 +290,6 @@ namespace AF
                 else
                 {
                     playerManager.playerInventory.RemoveItem(currentConsumedItem, 1);
-                }
-            }
-
-            if (currentConsumedItem.statusesToRemove != null && currentConsumedItem.statusesToRemove.Length > 0)
-            {
-                foreach (StatusEffect statusEffectToRemove in currentConsumedItem.statusesToRemove)
-                {
-                    AppliedStatusEffect appliedStatusEffect = playerManager.statusController.appliedStatusEffects.FirstOrDefault(
-                        x => x.statusEffect == statusEffectToRemove);
-
-                    if (appliedStatusEffect != null)
-                    {
-                        playerManager.statusController.RemoveAppliedStatus(appliedStatusEffect);
-                    }
                 }
             }
 

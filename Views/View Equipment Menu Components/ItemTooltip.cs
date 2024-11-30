@@ -1261,10 +1261,6 @@ namespace AF
             {
                 CreateTooltip(statusEffectsSprite, Color.white, consumable.GetShortDescription());
             }
-            if (consumable.statusesToRemove != null && consumable.statusesToRemove.Length > 0)
-            {
-                CreateTooltip(statusEffectsSprite, Color.white, consumable.GetFormattedRemovedStatusEffects());
-            }
             if (consumable.statusEffectsWhenConsumed != null && consumable.statusEffectsWhenConsumed.Length > 0)
             {
                 string consumableText = consumable.GetFormattedAppliedStatusEffects();
