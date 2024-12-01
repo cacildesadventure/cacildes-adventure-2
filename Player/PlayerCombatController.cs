@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using AF.Combat;
-using AF.Ladders;
-using UnityEngine;
-
-namespace AF
+﻿namespace AF
 {
+    using System.Collections;
+    using AF.Combat;
+    using AF.Ladders;
+    using UnityEngine;
+
     public class PlayerCombatController : MonoBehaviour
     {
         public float crossFade = 0.1f;
@@ -139,9 +139,9 @@ namespace AF
 
             Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
 
-            if (currentWeapon != null)
+            if (currentWeapon?.weaponAnimation != null)
             {
-                maxCombo = currentWeapon.lightAttackCombos - 1;
+                maxCombo = currentWeapon.weaponAnimation.lightAttackCombos - 1;
             }
 
             return maxCombo;
@@ -225,22 +225,19 @@ namespace AF
             heavyAttackComboIndex++;
         }
 
-
-
         int GetMaxHeavyCombo()
         {
             int maxCombo = 0;
 
             Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
 
-            if (currentWeapon != null)
+            if (currentWeapon?.weaponAnimation != null)
             {
-                maxCombo = currentWeapon.heavyAttackCombos - 1;
+                maxCombo = currentWeapon.weaponAnimation.heavyAttackCombos - 1;
             }
 
             return maxCombo;
         }
-
 
         public bool CanLightAttack()
         {

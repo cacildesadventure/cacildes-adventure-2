@@ -20,6 +20,7 @@ public class GameSettings : ScriptableObject
     public float maximumCameraDistance = 15;
     public float defaultCameraDistance = 4;
     public float cameraDistance = 4;
+    public float zoomSpeed = 2f;
 
     public float minimumCameraSensitivity = 0f;
     public float maximumCameraSensitivity = 10f;

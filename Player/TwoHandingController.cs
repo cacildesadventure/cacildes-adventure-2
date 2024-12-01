@@ -5,17 +5,13 @@ using UnityEngine.Events;
 
 namespace AF
 {
-
     public class TwoHandingController : MonoBehaviour
     {
         public PlayerManager playerManager;
         public Soundbank soundbank;
-
         [Header("Databases")]
         public EquipmentDatabase equipmentDatabase;
-
         public UnityAction onTwoHandingModeChanged;
-
         [Header("Two Hand Unarmed Animations")]
         public Weapon twoHandUnarmedWeapon;
 

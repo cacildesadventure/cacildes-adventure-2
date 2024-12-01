@@ -107,11 +107,20 @@ namespace AF
         public int manaCostToUseWeaponSpecialAttack = 0;
 
         [Header("Animation Overrides")]
+        public WeaponAnimation weaponAnimation;
+
+        [Header("!! DEPRECATED !!")]
+
+        [Obsolete("Use animationData instead.")]
         public List<AnimationOverride> animationOverrides;
+        [Obsolete("Use animationData instead.")]
         [Tooltip("Optional")] public List<AnimationOverride> twoHandOverrides;
+        [Obsolete("Use animationData instead.")]
         [Tooltip("Optional")] public List<AnimationOverride> blockOverrides;
 
+        [Obsolete("Use animationData instead.")]
         public int lightAttackCombos = 2;
+        [Obsolete("Use animationData instead.")]
         public int heavyAttackCombos = 1;
 
         [Header("Upper Layer Options")]

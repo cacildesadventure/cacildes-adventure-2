@@ -1,9 +1,7 @@
-﻿using AF.Shops;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
-namespace AF
+﻿namespace AF
 {
+    using UnityEngine;
+
     public class CursorManager : MonoBehaviour
     {
         public GameSession gameSession;

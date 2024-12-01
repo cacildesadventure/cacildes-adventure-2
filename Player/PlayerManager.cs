@@ -1,6 +1,7 @@
 namespace AF
 {
     using System.Collections.Generic;
+    using System.Linq;
     using AF.Animations;
     using AF.Equipment;
     using AF.Events;
@@ -181,20 +182,18 @@ namespace AF
 
             if (currentWeapon != null)
             {
-                if (currentWeapon.animationOverrides.Count > 0)
+                if (currentWeapon.weaponAnimation != null && currentWeapon.weaponAnimation.oneHandAnimationOverrides.Count > 0)
                 {
-                    UpdateAnimationOverrides(animator, clipOverrides, currentWeapon.animationOverrides);
+                    UpdateAnimationOverrides(animator, clipOverrides, currentWeapon.weaponAnimation.oneHandAnimationOverrides);
                 }
 
-                if (equipmentDatabase.isTwoHanding)
+                if (equipmentDatabase.isTwoHanding && currentWeapon?.weaponAnimation?.twoHandOverrides?.Any() == true)
                 {
-                    if (currentWeapon.twoHandOverrides != null && currentWeapon.twoHandOverrides.Count > 0)
-                    {
-                        List<AnimationOverride> animationOverrides = new();
-                        animationOverrides.AddRange(currentWeapon.twoHandOverrides);
-                        animationOverrides.AddRange(currentWeapon.blockOverrides);
-                        UpdateAnimationOverrides(animator, clipOverrides, animationOverrides);
-                    }
+                    List<AnimationOverride> animationOverrides = new();
+                    animationOverrides.AddRange(currentWeapon.weaponAnimation.twoHandOverrides);
+                    animationOverrides.AddRange(currentWeapon.weaponAnimation.blockOverrides);
+                    animationOverrides.AddRange(currentWeapon.weaponAnimation.dualWieldingOverrides);
+                    UpdateAnimationOverrides(animator, clipOverrides, animationOverrides);
                 }
             }
         }

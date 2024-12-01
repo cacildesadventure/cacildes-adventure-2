@@ -71,6 +71,7 @@ namespace AF
 		[Header("Components")]
 		public EquipmentSlots equipmentSlots;
 		public ViewSettingsLoad[] viewSettingsLoad;
+		public PlayerCamera playerCamera;
 
 		private void Awake()
 		{
@@ -248,6 +249,26 @@ namespace AF
 			if (value.isPressed)
 			{
 				onPreviousMenu?.Invoke();
+			}
+		}
+
+		public void OnZoomIn(InputValue value)
+		{
+			if (value.isPressed)
+			{
+				float scrollDelta = value.Get<float>();
+
+				playerCamera.ZoomOut(scrollDelta);
+			}
+		}
+
+		public void OnZoomOut(InputValue value)
+		{
+			if (value.isPressed)
+			{
+				float scrollDelta = value.Get<float>();
+
+				playerCamera.ZoomIn(scrollDelta);
 			}
 		}
 
