@@ -250,7 +250,12 @@ namespace AF
             root.Q<VisualElement>("MaximumStamina").Q<Label>("Value").text = playerManager.staminaStatManager.GetStaminaPointsForGivenEndurance(desiredEndurance) + "";
             root.Q<VisualElement>("MaximumMana").Q<Label>("Value").text = playerManager.manaManager.GetManaPointsForGivenIntelligence(desiredIntelligence) + "";
             root.Q<VisualElement>("PhysicalAttackPower").Q<Label>("Value").text =
-                playerManager.attackStatManager.GetCurrentPhysicalAttackForGivenStrengthAndDexterity(desiredStrength, desiredDexterity) + "";
+                playerManager.equipmentDatabase.unarmedWeapon.weaponClass.GetCurrentDamage(
+                    playerManager,
+                    desiredStrength,
+                    desiredDexterity,
+                    desiredIntelligence,
+                    playerManager.equipmentDatabase.unarmedWeapon.level) + "";
             root.Q<VisualElement>("DefenseAbsorption").Q<Label>("Value").text = playerManager.defenseStatManager.GetCurrentPhysicalDefenseForGivenEndurance(desiredEndurance) + "";
 
             // Buttons

@@ -174,26 +174,30 @@ namespace AF
             animatorOverrideController.GetOverrides(clipOverrides);
             animator.runtimeAnimatorController = defaultAnimatorController;
 
-            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
-            if (currentWeapon == null && equipmentDatabase.isTwoHanding)
-            {
-                currentWeapon = twoHandingController.twoHandUnarmedWeapon;
-            }
+            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon() ?? equipmentDatabase.unarmedWeapon;
 
             if (currentWeapon != null)
             {
-                if (currentWeapon.weaponAnimation != null && currentWeapon.weaponAnimation.oneHandAnimationOverrides.Count > 0)
+                if (currentWeapon.weaponClass != null && currentWeapon.weaponClass.baseAnimationOverrides.Count > 0)
                 {
-                    UpdateAnimationOverrides(animator, clipOverrides, currentWeapon.weaponAnimation.oneHandAnimationOverrides);
+                    UpdateAnimationOverrides(animator, clipOverrides, currentWeapon.weaponClass.baseAnimationOverrides);
                 }
 
-                if (equipmentDatabase.isTwoHanding && currentWeapon?.weaponAnimation?.twoHandOverrides?.Any() == true)
+                if (equipmentDatabase.isTwoHanding && currentWeapon?.weaponClass?.twoHandOverrides?.Any() == true)
                 {
                     List<AnimationOverride> animationOverrides = new();
-                    animationOverrides.AddRange(currentWeapon.weaponAnimation.twoHandOverrides);
-                    animationOverrides.AddRange(currentWeapon.weaponAnimation.blockOverrides);
-                    animationOverrides.AddRange(currentWeapon.weaponAnimation.dualWieldingOverrides);
+                    animationOverrides.AddRange(currentWeapon.weaponClass.twoHandOverrides);
+                    animationOverrides.AddRange(currentWeapon.weaponClass.blockOverrides);
                     UpdateAnimationOverrides(animator, clipOverrides, animationOverrides);
+                }
+            }
+
+            Weapon secondaryWeapon = equipmentDatabase.GetCurrentSecondaryWeapon();
+            if (secondaryWeapon != null)
+            {
+                if (secondaryWeapon.weaponClass != null && secondaryWeapon.weaponClass.secondaryWeaponOverrides.Count > 0)
+                {
+                    UpdateAnimationOverrides(animator, clipOverrides, secondaryWeapon.weaponClass.secondaryWeaponOverrides);
                 }
             }
         }

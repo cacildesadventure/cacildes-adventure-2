@@ -109,7 +109,11 @@ namespace AF
             UpdateSlot(spellSlotContainer, equipmentDatabase.IsBowEquipped() ? equipmentDatabase.GetCurrentArrow() : equipmentDatabase.GetCurrentSpell(), unequippedSpellSlot, unequippedArrowSlot);
             UpdateSlot(weaponSlotContainer, equipmentDatabase.GetCurrentWeapon(), unequippedWeaponSlot);
             UpdateSlot(consumableSlotContainer, equipmentDatabase.GetCurrentConsumable(), unequippedConsumableSlot);
-            UpdateSlot(shieldSlotContainer, equipmentDatabase.GetCurrentShield(), unequippedShieldSlot);
+            UpdateSlot(shieldSlotContainer,
+                equipmentDatabase.GetCurrentSecondaryWeapon() != null
+                    ? equipmentDatabase.GetCurrentSecondaryWeapon()
+                    : equipmentDatabase.GetCurrentShield(),
+                unequippedShieldSlot);
             shieldBlockedIcon.style.display = equipmentDatabase.IsBowEquipped() || equipmentDatabase.IsStaffEquipped() ? DisplayStyle.Flex : DisplayStyle.None;
 
             UpdateSlotInputUI(spellSlotContainer.Q<VisualElement>("Keyboard"), switchSpellGamepad, switchSpellKey);

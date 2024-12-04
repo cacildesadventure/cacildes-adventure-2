@@ -1,6 +1,6 @@
-using UnityEngine;
 namespace AF
 {
+    using UnityEngine;
 
     public class CharacterTwoHandRef : MonoBehaviour
     {
@@ -18,9 +18,6 @@ namespace AF
 
         Vector3 originalPosition;
         Quaternion originalRotation;
-
-        [Header("Dual Wielding")]
-        public CharacterWeaponHitbox leftWeapon;
 
         [Header("Components")]
         public PlayerManager playerManager;
@@ -43,16 +40,9 @@ namespace AF
 
         private void OnDisable()
         {
-
             playerManager.twoHandingController.onTwoHandingModeChanged -= EvaluateTwoHandingUpdate;
             playerManager.characterBlockController.onBlockChanged -= EvaluateTwoHandingUpdate;
             playerManager.characterBlockController.onBlockChanged -= UseBlockTransform;
-
-
-            if (leftWeapon != null)
-            {
-                playerManager.playerWeaponsManager.UnequipLeftWeapon();
-            }
         }
 
 
@@ -71,17 +61,11 @@ namespace AF
             }
 
             UseTwoHandTransform();
-            UseLeftWeapon();
         }
 
         public void UseOneHandTransform()
         {
             transform.SetLocalPositionAndRotation(originalPosition, originalRotation);
-
-            if (leftWeapon != null)
-            {
-                playerManager.playerWeaponsManager.UnequipLeftWeapon();
-            }
         }
 
         public void UseTwoHandTransform()
@@ -104,14 +88,6 @@ namespace AF
 
             this.transform.localPosition = blockPosition;
             this.transform.localEulerAngles = blockRotation;
-        }
-
-        public void UseLeftWeapon()
-        {
-            if (leftWeapon != null)
-            {
-                playerManager.playerWeaponsManager.EquipLeftWeapon(leftWeapon);
-            }
         }
     }
 }

@@ -76,20 +76,23 @@ namespace AF
             return currentPosture + itemPostureBonus;
         }
 
-        public static int GetElementalAttackForCurrentWeapon(Weapon weapon, WeaponElementType elementType, AttackStatManager attackStatManager, int playerCurrentReputation)
+        public static int GetElementalAttackForCurrentWeapon(Weapon weapon, WeaponElementType elementType, AttackStatManager attackStatManager)
         {
             if (weapon == null) return 0;
 
-            return elementType switch
+
+            if (elementType == WeaponElementType.None)
             {
-                WeaponElementType.Fire => weapon.GetWeaponFireAttack(),
-                WeaponElementType.Frost => weapon.GetWeaponFrostAttack(),
-                WeaponElementType.Lightning => weapon.GetWeaponLightningAttack(playerCurrentReputation),
-                WeaponElementType.Darkness => weapon.GetWeaponDarknessAttack(playerCurrentReputation),
-                WeaponElementType.Magic => weapon.GetWeaponMagicAttack(attackStatManager),
-                WeaponElementType.Water => weapon.GetWeaponWaterAttack(),
-                _ => 0
-            };
+                return 0;
+            }
+
+            return weapon.weaponClass.GetWeaponAttack(
+                    elementType,
+                    attackStatManager.playerManager,
+                    attackStatManager.playerManager.statsBonusController.GetCurrentStrength(),
+                    attackStatManager.playerManager.statsBonusController.GetCurrentDexterity(),
+                    attackStatManager.playerManager.statsBonusController.GetCurrentIntelligence(),
+                    weapon.level);
         }
 
         public static int GetElementalDefenseFromItem(ArmorBase armorBase, WeaponElementType weaponElementType, DefenseStatManager defenseStatManager, EquipmentDatabase equipmentDatabase)

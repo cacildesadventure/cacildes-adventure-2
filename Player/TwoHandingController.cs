@@ -12,8 +12,6 @@ namespace AF
         [Header("Databases")]
         public EquipmentDatabase equipmentDatabase;
         public UnityAction onTwoHandingModeChanged;
-        [Header("Two Hand Unarmed Animations")]
-        public Weapon twoHandUnarmedWeapon;
 
         private void Awake()
         {

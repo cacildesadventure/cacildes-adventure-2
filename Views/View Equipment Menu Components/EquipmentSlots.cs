@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UIElements;
 
@@ -532,9 +531,9 @@ namespace AF.UI.EquipmentMenu
             SetBackgroundImage(weaponButtonSlot2, equipmentDatabase.weapons, 1, txt_UnequipedWeapon);
             SetBackgroundImage(weaponButtonSlot3, equipmentDatabase.weapons, 2, txt_UnequipedWeapon);
 
-            SetBackgroundImage(secondaryWeaponButtonSlot1, equipmentDatabase.shields, 0, txt_UnequipedShield);
-            SetBackgroundImage(secondaryWeaponButtonSlot2, equipmentDatabase.shields, 1, txt_UnequipedShield);
-            SetBackgroundImage(secondaryWeaponButtonSlot3, equipmentDatabase.shields, 2, txt_UnequipedShield);
+            SetShieldSlot(secondaryWeaponButtonSlot1, 0, txt_UnequipedShield);
+            SetShieldSlot(secondaryWeaponButtonSlot2, 1, txt_UnequipedShield);
+            SetShieldSlot(secondaryWeaponButtonSlot3, 2, txt_UnequipedShield);
 
             SetBackgroundImage(arrowsButtonSlot1, equipmentDatabase.arrows, 0, txt_UnequipedArrow);
             SetBackgroundImage(arrowsButtonSlot2, equipmentDatabase.arrows, 1, txt_UnequipedArrow);
@@ -581,6 +580,24 @@ namespace AF.UI.EquipmentMenu
                     button.style.backgroundImage = new StyleBackground(unequippedTexture);
                 }
             }
+        }
+
+        void SetShieldSlot(VisualElement button, int index, Texture2D unequippedTexture)
+        {
+            if (index < equipmentDatabase.shields.Length && equipmentDatabase.shields[index] != null)
+            {
+                button.style.backgroundImage = new StyleBackground(equipmentDatabase.shields[index].sprite);
+                return;
+            }
+
+            if (index < equipmentDatabase.secondaryWeapons.Length && equipmentDatabase.secondaryWeapons[index] != null)
+            {
+                button.style.backgroundImage = new StyleBackground(equipmentDatabase.secondaryWeapons[index].sprite);
+                return;
+            }
+
+            button.style.backgroundImage = new StyleBackground(unequippedTexture);
+
         }
 
         /// <summary>

@@ -417,20 +417,28 @@ namespace AF
                     weapon.DrawRequirements(playerManager.statsBonusController));
             }
 
-            var strengthAttackBonus = attackStatManager.GetStrengthBonusFromWeapon(weapon);
-            var dexterityAttackBonus = attackStatManager.GetDexterityBonusFromWeapon(weapon);
-            var intelligenceAttackBonus = attackStatManager.GetIntelligenceBonusFromWeapon(weapon);
+            var currentWeaponDamage = weapon.weaponClass.GetCurrentDamage(
+                playerManager,
+                playerManager.statsBonusController.GetCurrentStrength(),
+                playerManager.statsBonusController.GetCurrentDexterity(),
+                playerManager.statsBonusController.GetCurrentIntelligence(),
+                weapon.level
+            );
+
+            int playerStrength = playerManager.statsBonusController.GetCurrentStrength();
+            int playerDexterity = playerManager.statsBonusController.GetCurrentDexterity();
+            int playerIntelligence = playerManager.statsBonusController.GetCurrentIntelligence();
 
             string damageExplanation = String.Format(
                 damageExplanationLabel.GetLocalizedString(),
-                attackStatManager.GetWeaponAttack(weapon),
-                weapon.damage.physical,
-                strengthAttackBonus,
-                weapon.strengthScaling,
-                dexterityAttackBonus,
-                weapon.dexterityScaling,
-                intelligenceAttackBonus,
-                weapon.intelligenceScaling
+                currentWeaponDamage.physical,
+                currentWeaponDamage.physical,
+                weapon.weaponClass.GetStrengthScalingBonus(playerStrength),
+                weapon.weaponClass.strengthScaling,
+                weapon.weaponClass.GetDexterityScalingBonus(playerDexterity),
+                weapon.weaponClass.dexterityScaling,
+                weapon.weaponClass.GetIntelligenceScalingBonus(playerIntelligence),
+                weapon.weaponClass.intelligenceScaling
             );
 
             CreateTooltip(weaponPhysicalAttackSprite, Color.white, damageExplanation);
@@ -441,92 +449,125 @@ namespace AF
             {
                 CreateTooltip(holyWeaponSprite, Color.white, holyWeaponLabel.GetLocalizedString());
             }
-            if (weapon.GetWeaponFireAttack() > 0)
+
+            int weaponFireAttack = weapon.weaponClass.GetWeaponAttack(
+                WeaponElementType.Fire,
+                playerManager,
+                playerStrength,
+                playerDexterity,
+                playerIntelligence,
+                weapon.level);
+
+            if (weaponFireAttack > 0)
             {
                 CreateTooltip(
                     fireSprite,
                     fire,
                     String.Format(
                         fireAttackLabel.GetLocalizedString(),
-                        weapon.GetWeaponFireAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
+                        weaponFireAttack));
             }
 
-            if (weapon.GetWeaponFrostAttack() > 0)
+            int weaponFrostAttack = weapon.weaponClass.GetWeaponAttack(
+                WeaponElementType.Frost,
+                playerManager,
+                playerStrength,
+                playerDexterity,
+                playerIntelligence,
+                weapon.level);
+
+            if (weaponFrostAttack > 0)
             {
                 CreateTooltip(
                     frostSprite,
                     frost,
                     String.Format(
                         frostAttackLabel.GetLocalizedString(),
-                        weapon.GetWeaponFrostAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
+                        weaponFrostAttack));
             }
 
-            if (weapon.GetWeaponLightningAttack(playerManager.playerStatsDatabase.GetCurrentReputation()) > 0)
+            int weaponLightningAttack = weapon.weaponClass.GetWeaponAttack(
+                WeaponElementType.Lightning,
+                playerManager,
+                playerStrength,
+                playerDexterity,
+                playerIntelligence,
+                weapon.level);
+
+            if (weaponLightningAttack > 0)
             {
                 CreateTooltip(
                 lightningSprite,
                 lightning,
                 String.Format(
                     lightningAttackLabel.GetLocalizedString(),
-                    weapon.GetWeaponLightningAttack(playerManager.playerStatsDatabase.GetCurrentReputation())
-                        + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
+                    weaponLightningAttack));
             }
 
-            if (weapon.GetWeaponMagicAttack(attackStatManager) > 0)
+            int weaponMagicAttack = weapon.weaponClass.GetWeaponAttack(
+                WeaponElementType.Magic,
+                playerManager,
+                playerStrength,
+                playerDexterity,
+                playerIntelligence,
+                weapon.level);
+
+            if (weaponMagicAttack > 0)
             {
                 CreateTooltip(
                 magicSprite,
                 magic,
                 String.Format(
                     magicAttackLabel.GetLocalizedString(),
-                    weapon.GetWeaponMagicAttack(attackStatManager) + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
+                    weaponMagicAttack));
             }
 
-            if (weapon.GetWeaponDarknessAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation()) > 0)
+            int weaponDarknessAttack = weapon.weaponClass.GetWeaponAttack(
+                WeaponElementType.Darkness,
+                playerManager,
+                playerStrength,
+                playerDexterity,
+                playerIntelligence,
+                weapon.level);
+
+            if (weaponDarknessAttack > 0)
             {
                 CreateTooltip(
                 darknessSprite,
                 darkness,
                 String.Format(
                     darknessAttackLabel.GetLocalizedString(),
-                    weapon.GetWeaponDarknessAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation()) + attackStatManager.GetIntelligenceBonusFromWeapon(weapon)));
+                    weaponDarknessAttack));
             }
 
-            if (weapon.damage.weaponAttackType == WeaponAttackType.Blunt)
+            if (weapon.weaponClass.damage.weaponAttackType == WeaponAttackType.Blunt)
             {
                 CreateTooltip(bluntSprite, Color.white, damageTypeBluntLabel.GetLocalizedString());
             }
-            if (weapon.damage.weaponAttackType == WeaponAttackType.Pierce)
+            if (weapon.weaponClass.damage.weaponAttackType == WeaponAttackType.Pierce)
             {
                 CreateTooltip(pierceSprite, Color.white, damageTypePierceLabel.GetLocalizedString());
             }
-            if (weapon.damage.weaponAttackType == WeaponAttackType.Slash)
+            if (weapon.weaponClass.damage.weaponAttackType == WeaponAttackType.Slash)
             {
                 CreateTooltip(slashSprite, Color.white, damageTypeSlashLabel.GetLocalizedString());
             }
-            if (weapon.damage.statusEffects != null && weapon.damage.statusEffects.Length > 0)
+            if (weapon.weaponClass.damage.statusEffects != null && weapon.weaponClass.damage.statusEffects.Length > 0)
             {
-                CreateTooltip(statusEffectsSprite, Color.white, weapon.GetFormattedStatusDamages());
+                CreateTooltip(statusEffectsSprite, Color.white, weapon.weaponClass.GetFormattedStatusDamages(playerManager, weapon.level));
             }
 
-            if (weapon.damage.pushForce > 0)
+            if (weapon.weaponClass.damage.pushForce > 0)
             {
                 CreateTooltip(pushForceSprite, Color.white, String.Format(
-                    pushForceLabel.GetLocalizedString(), weapon.damage.pushForce));
+                    pushForceLabel.GetLocalizedString(), weapon.weaponClass.damage.pushForce));
             }
 
-            if (weapon.damage.postureDamage > 0)
+            if (weapon.weaponClass.damage.postureDamage > 0)
             {
                 CreateTooltip(postureSprite, Color.white, String.Format(
-                    postureDamageLabel.GetLocalizedString(), weapon.damage.postureDamage));
+                    postureDamageLabel.GetLocalizedString(), weapon.weaponClass.damage.postureDamage));
             }
-
-            /*            if (weapon.heavyAttackBonus > 0)
-                        {
-                            CreateTooltip(heavyAttackSprite, Color.white,
-                            String.Format(
-                                heavyAttackBonusLabel.GetLocalizedString(), weapon.heavyAttackBonus));
-                        }*/
 
             CreateTooltip(
                 staminaCostSprite,
@@ -538,12 +579,12 @@ namespace AF
                 CreateTooltip(blacksmithSprite, Color.white, weapon.GetMaterialCostForNextLevel());
             }
 
-            if (weapon.damage.ignoreBlocking)
+            if (weapon.weaponClass.damage.ignoreBlocking)
             {
                 CreateTooltip(defenseAbsorptionSprite, Color.white, ignoresEnemyShields.GetLocalizedString());
             }
 
-            if (weapon.damage.canNotBeParried)
+            if (weapon.weaponClass.damage.canNotBeParried)
             {
                 CreateTooltip(defenseAbsorptionSprite, Color.white, canNotBeParried.GetLocalizedString());
             }

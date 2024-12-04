@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AF.Health;
 using AF.Inventory;
 using AF.Music;
 using GameAnalyticsSDK;
@@ -522,44 +523,7 @@ namespace AF
             root.Q<Label>("MagicAttack").style.display = DisplayStyle.None;
             root.Q<Label>("DarknessAttack").style.display = DisplayStyle.None;
 
-            if (weapon.GetWeaponAttackForLevel(playerManager.attackStatManager, nextLevel) > 0)
-            {
-                root.Q<Label>("PhysicalAttack").style.display = DisplayStyle.Flex;
-                root.Q<Label>("PhysicalAttack").text = NextPhysicalDamage_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponAttackForLevel(playerManager.attackStatManager, weapon.level) + " > " + weapon.GetWeaponAttackForLevel(playerManager.attackStatManager, nextLevel);
-            }
-            if (weapon.GetWeaponFireAttackForLevel(nextLevel) > 0)
-            {
-                root.Q<Label>("FireAttack").style.display = DisplayStyle.Flex;
-                root.Q<Label>("FireAttack").text = NextFireBonus_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponFireAttackForLevel(weapon.level) + " > " + weapon.GetWeaponFireAttackForLevel(nextLevel);
-            }
-            if (weapon.GetWeaponFrostAttackForLevel(nextLevel) > 0)
-            {
-                root.Q<Label>("FrostAttack").style.display = DisplayStyle.Flex;
-                root.Q<Label>("FrostAttack").text = NextFrostBonus_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponFrostAttackForLevel(weapon.level) + " > " + weapon.GetWeaponFrostAttackForLevel(nextLevel);
-            }
-
-            int playerReputation = playerStatsDatabase.GetCurrentReputation();
-            if (weapon.GetWeaponLightningAttackForLevel(nextLevel, playerReputation) > 0)
-            {
-                root.Q<Label>("LightningAttack").style.display = DisplayStyle.Flex;
-                root.Q<Label>("LightningAttack").text = NextLightningBonus_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponLightningAttackForLevel(weapon.level, playerReputation) + " > " + weapon.GetWeaponLightningAttackForLevel(nextLevel, playerReputation);
-            }
-            if (weapon.GetWeaponMagicAttackForLevel(nextLevel, playerManager.attackStatManager) > 0)
-            {
-                root.Q<Label>("MagicAttack").style.display = DisplayStyle.Flex;
-                root.Q<Label>("MagicAttack").text = NextMagicBonus_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponMagicAttackForLevel(weapon.level, playerManager.attackStatManager) + " > " + weapon.GetWeaponMagicAttackForLevel(nextLevel, playerManager.attackStatManager);
-            }
-            if (weapon.GetWeaponDarknessAttackForLevel(nextLevel, playerReputation) > 0)
-            {
-                root.Q<Label>("DarknessAttack").style.display = DisplayStyle.Flex;
-                root.Q<Label>("DarknessAttack").text = NextDarknessBonus_LocalizedString.GetLocalizedString() + " "
-                    + weapon.GetWeaponDarknessAttackForLevel(weapon.level, playerReputation) + " > " + weapon.GetWeaponDarknessAttackForLevel(nextLevel, playerReputation);
-            }
+            UpdateWeaponDamageUI(weapon, playerManager, nextLevel, playerManager.statsBonusController.GetCurrentReputation());
 
             // Requirements
 
@@ -601,6 +565,51 @@ namespace AF
 
             root.Q<VisualElement>("ItemInfo").Add(goldItemEntry);
             root.Q<VisualElement>("IngredientsListPreview").style.opacity = 1;
+        }
+
+        private void UpdateDamageUI(
+    string labelName,
+    string localizedString,
+    float currentValue,
+    float desiredValue)
+        {
+            var label = root.Q<Label>(labelName);
+            if (desiredValue > 0)
+            {
+                label.style.display = DisplayStyle.Flex;
+                label.text = $"{localizedString} {desiredValue} > {currentValue}";
+            }
+            else
+            {
+                label.style.display = DisplayStyle.None;
+            }
+        }
+
+        void UpdateWeaponDamageUI(Weapon weapon, PlayerManager playerManager, int nextLevel, int playerReputation)
+        {
+            Damage currentWeaponDamage = weapon.weaponClass.GetCurrentDamage(
+                playerManager,
+                playerManager.statsBonusController.GetCurrentStrength(),
+                playerManager.statsBonusController.GetCurrentDexterity(),
+                playerManager.statsBonusController.GetCurrentIntelligence(),
+                weapon.level
+            );
+
+            Damage desiredWeaponDamage = weapon.weaponClass.GetCurrentDamage(
+                playerManager,
+                playerManager.statsBonusController.GetCurrentStrength(),
+                playerManager.statsBonusController.GetCurrentDexterity(),
+                playerManager.statsBonusController.GetCurrentIntelligence(),
+                nextLevel
+            );
+
+            // Update damage types
+            UpdateDamageUI("PhysicalAttack", NextPhysicalDamage_LocalizedString.GetLocalizedString(), currentWeaponDamage.physical, desiredWeaponDamage.physical);
+            UpdateDamageUI("FireAttack", NextFireBonus_LocalizedString.GetLocalizedString(), currentWeaponDamage.fire, desiredWeaponDamage.fire);
+            UpdateDamageUI("FrostAttack", NextFrostBonus_LocalizedString.GetLocalizedString(), currentWeaponDamage.frost, desiredWeaponDamage.frost);
+            UpdateDamageUI("LightningAttack", NextLightningBonus_LocalizedString.GetLocalizedString(), currentWeaponDamage.lightning, desiredWeaponDamage.lightning);
+            UpdateDamageUI("MagicAttack", NextMagicBonus_LocalizedString.GetLocalizedString(), currentWeaponDamage.magic, desiredWeaponDamage.magic);
+            UpdateDamageUI("DarknessAttack", NextDarknessBonus_LocalizedString.GetLocalizedString(), currentWeaponDamage.darkness, desiredWeaponDamage.darkness);
         }
 
         void LogAnalytic(string eventName)

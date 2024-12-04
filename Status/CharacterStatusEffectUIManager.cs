@@ -21,9 +21,6 @@ namespace AF
             CharacterStatusEffectIndicator characterStatusEffectIndicator = Instantiate(
                 characterStatusEffectIndicatorPrefab, indicatorInstancesParent);
 
-            characterStatusEffectIndicator.background.sprite = statusEffect.statusEffect.icon;
-            characterStatusEffectIndicator.fill.sprite = statusEffect.statusEffect.icon;
-
             appliedStatusUIIndicatorInstances.Add(statusEffect.statusEffect, characterStatusEffectIndicator);
         }
 
@@ -32,7 +29,7 @@ namespace AF
             if (appliedStatusUIIndicatorInstances.ContainsKey(appliedStatusEffect.statusEffect))
             {
                 appliedStatusUIIndicatorInstances[appliedStatusEffect.statusEffect].UpdateUI(
-                    appliedStatusEffect, Mathf.Clamp(appliedStatusEffect.currentAmount / currentMaximumResistanceToStatusEffect, 0, 1f));
+                    appliedStatusEffect, currentMaximumResistanceToStatusEffect);
             }
         }
 

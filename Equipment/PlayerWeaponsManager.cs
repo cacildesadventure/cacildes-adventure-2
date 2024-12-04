@@ -1,14 +1,14 @@
-using System.Collections.Generic;
-using System.Linq;
-using AF.Events;
-using AF.Health;
-using AF.Stats;
-using TigerForge;
-using UnityEngine;
-using UnityEngine.Localization;
-
 namespace AF.Equipment
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using AF.Events;
+    using AF.Health;
+    using AF.Stats;
+    using TigerForge;
+    using UnityEngine;
+    using UnityEngine.Localization;
+
     public class PlayerWeaponsManager : MonoBehaviour
     {
         [Header("Unarmed Weapon References In-World")]
@@ -19,14 +19,16 @@ namespace AF.Equipment
 
         [Header("Weapon References In-World")]
         public List<CharacterWeaponHitbox> weaponInstances;
+        public List<CharacterWeaponHitbox> secondaryWeaponInstances;
         public List<ShieldInstance> shieldInstances;
 
         [Header("Current Weapon")]
         public CharacterWeaponHitbox currentWeaponInstance;
+        public CharacterWeaponHitbox currentSecondaryWeaponInstance;
         public ShieldInstance currentShieldInstance;
 
         [Header("Dual Wielding")]
-        public CharacterWeaponHitbox leftWeaponInstance;
+        public CharacterWeaponHitbox secondaryWeaponInstance;
 
         [Header("Database")]
         public EquipmentDatabase equipmentDatabase;
@@ -80,23 +82,26 @@ namespace AF.Equipment
         public void CloseAllWeaponHitboxes()
         {
             currentWeaponInstance?.DisableHitbox();
+            currentSecondaryWeaponInstance?.DisableHitbox();
             leftFootHitbox?.DisableHitbox();
             rightFootHitbox?.DisableHitbox();
             leftHandHitbox?.DisableHitbox();
             rightHandHitbox?.DisableHitbox();
-            leftWeaponInstance?.DisableHitbox();
         }
 
         void UpdateCurrentWeapon()
         {
             var CurrentWeapon = equipmentDatabase.GetCurrentWeapon();
+            var SecondaryWeapon = equipmentDatabase.GetCurrentSecondaryWeapon();
 
-            if (currentWeaponInstance != null)
-            {
-                currentWeaponInstance = null;
-            }
+            if (currentWeaponInstance != null) currentWeaponInstance = null;
+            if (currentSecondaryWeaponInstance != null) currentSecondaryWeaponInstance = null;
 
-            foreach (CharacterWeaponHitbox weaponHitbox in weaponInstances)
+            List<CharacterWeaponHitbox> weaponsList = new List<CharacterWeaponHitbox>();
+            weaponsList.AddRange(weaponInstances);
+            weaponsList.AddRange(secondaryWeaponInstances);
+
+            foreach (CharacterWeaponHitbox weaponHitbox in weaponsList)
             {
                 weaponHitbox?.DisableHitbox();
                 weaponHitbox?.gameObject.SetActive(false);
@@ -104,9 +109,16 @@ namespace AF.Equipment
 
             if (CurrentWeapon != null)
             {
-                var gameObjectWeapon = weaponInstances.FirstOrDefault(x => x.weapon.name == CurrentWeapon.name);
+                var gameObjectWeapon = weaponInstances.FirstOrDefault(x => x.weapon == CurrentWeapon);
                 currentWeaponInstance = gameObjectWeapon;
                 currentWeaponInstance.gameObject.SetActive(true);
+            }
+
+            if (SecondaryWeapon != null)
+            {
+                var gameObjectWeapon = secondaryWeaponInstances.FirstOrDefault(x => x.weapon == SecondaryWeapon);
+                secondaryWeaponInstance = gameObjectWeapon;
+                secondaryWeaponInstance.gameObject.SetActive(true);
             }
 
             playerManager.UpdateAnimatorOverrideControllerClips();
@@ -183,7 +195,6 @@ namespace AF.Equipment
             equipmentDatabase.EquipWeapon(weaponToEquip, slot);
 
             UpdateCurrentWeapon();
-
         }
 
         public void UnequipWeapon(int slot)
@@ -191,7 +202,20 @@ namespace AF.Equipment
             equipmentDatabase.UnequipWeapon(slot);
 
             UpdateCurrentWeapon();
+        }
 
+        public void EquipSecondaryWeapon(Weapon weaponToEquip, int slot)
+        {
+            equipmentDatabase.EquipSecondaryWeapon(weaponToEquip, slot);
+
+            UpdateCurrentWeapon();
+        }
+
+        public void UnequipSecondaryWeapon(int slot)
+        {
+            equipmentDatabase.UnequipSecondaryWeapon(slot);
+
+            UpdateCurrentWeapon();
         }
 
         public void EquipShield(Shield shieldToEquip, int slot)
@@ -214,45 +238,20 @@ namespace AF.Equipment
 
         public void ShowEquipment()
         {
-            if (currentWeaponInstance != null)
-            {
-                currentWeaponInstance.ShowWeapon();
-            }
-
-            if (currentShieldInstance != null)
-            {
-                currentShieldInstance.ResetStates();
-            }
+            currentWeaponInstance?.ShowWeapon();
+            currentSecondaryWeaponInstance?.ShowWeapon();
+            currentShieldInstance?.ResetStates();
         }
 
         public void HideEquipment()
         {
-            if (currentWeaponInstance != null)
-            {
-                currentWeaponInstance.HideWeapon();
-            }
-
-            if (currentShieldInstance != null)
-            {
-                currentShieldInstance.HideShield();
-            }
+            currentWeaponInstance?.HideWeapon();
+            currentSecondaryWeaponInstance?.HideWeapon();
+            currentShieldInstance?.HideShield();
         }
 
-        public void HideShield()
-        {
-            if (currentShieldInstance != null)
-            {
-                currentShieldInstance.HideShield();
-            }
-        }
-
-        public void ShowShield()
-        {
-            if (currentShieldInstance != null)
-            {
-                currentShieldInstance.ShowShield();
-            }
-        }
+        public void HideShield() => currentShieldInstance?.HideShield();
+        public void ShowShield() => currentShieldInstance?.ShowShield();
 
         bool CanApplyBuff()
         {
@@ -346,11 +345,13 @@ namespace AF.Equipment
 
             if (customDuration > 0)
             {
-                currentWeaponInstance.characterWeaponBuffs.ApplyBuff(weaponBuffName, customDuration);
+                currentWeaponInstance?.characterWeaponBuffs?.ApplyBuff(weaponBuffName, customDuration);
+                secondaryWeaponInstance?.characterWeaponBuffs?.ApplyBuff(weaponBuffName, customDuration);
             }
             else
             {
-                currentWeaponInstance.characterWeaponBuffs.ApplyBuff(weaponBuffName);
+                currentWeaponInstance?.characterWeaponBuffs?.ApplyBuff(weaponBuffName);
+                secondaryWeaponInstance?.characterWeaponBuffs?.ApplyBuff(weaponBuffName);
             }
         }
 
@@ -437,22 +438,6 @@ namespace AF.Equipment
             }
 
             return weaponDamage;
-        }
-
-        public void EquipLeftWeapon(CharacterWeaponHitbox leftWeaponGameObject)
-        {
-            leftWeaponInstance = leftWeaponGameObject;
-            leftWeaponInstance.gameObject.SetActive(true);
-        }
-
-        public void UnequipLeftWeapon()
-        {
-            if (leftWeaponInstance != null)
-            {
-                leftWeaponInstance.gameObject.SetActive(false);
-            }
-
-            leftWeaponInstance = null;
         }
 
         public int GetCurrentBlockStaminaCost()

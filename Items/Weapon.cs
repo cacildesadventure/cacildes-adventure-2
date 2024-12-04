@@ -11,15 +11,6 @@ using UnityEngine.Localization.Settings;
 
 namespace AF
 {
-    public enum Scaling
-    {
-        S,
-        A,
-        B,
-        C,
-        D,
-        E
-    }
 
     public enum WeaponAttackType
     {
@@ -46,6 +37,7 @@ namespace AF
         Magic,
         Darkness,
         Water,
+        Physical,
     }
 
     public enum PushForce
@@ -70,10 +62,11 @@ namespace AF
     [CreateAssetMenu(menuName = "Items / Weapon / New Weapon")]
     public class Weapon : Item
     {
-        public WeaponCategory weaponCategory;
+        [Header("Base Class")]
+        public WeaponClass weaponClass;
 
-        [Header("Attack")]
-        public Damage damage;
+
+        [Obsolete("Use weaponDamage instead")] public Damage damage;
 
         [Header("Level & Upgrades")]
         public bool canBeUpgraded = true;
@@ -99,15 +92,8 @@ namespace AF
         public int lightAttackStaminaCost = 20;
         public int heavyAttackStaminaCost = 35;
 
-        [Header("Scaling")]
-        public Scaling strengthScaling = Scaling.E;
-        public Scaling dexterityScaling = Scaling.E;
-        public Scaling intelligenceScaling = Scaling.E;
         [Header("Weapon Special Options")]
         public int manaCostToUseWeaponSpecialAttack = 0;
-
-        [Header("Animation Overrides")]
-        public WeaponAnimation weaponAnimation;
 
         [Header("!! DEPRECATED !!")]
 
@@ -179,167 +165,6 @@ namespace AF
         }
 #endif
 
-        public Damage CalculateValue(int currentLevel)
-        {
-
-            WeaponUpgradeLevel weaponUpgradeLevel = weaponUpgrades.ElementAtOrDefault(currentLevel - 2);
-
-            if (weaponUpgradeLevel != null)
-            {
-                return weaponUpgradeLevel.newDamage;
-            }
-
-            return this.damage;
-        }
-
-        public int GetWeaponBaseAttack()
-        {
-            return CalculateValue(this.level).physical;
-        }
-        public int GetWeaponAttack(AttackStatManager attackStatManager)
-        {
-            int strengthBonus = (int)attackStatManager.GetStrengthBonusFromWeapon(this);
-            int dexterityBonus = (int)attackStatManager.GetDexterityBonusFromWeapon(this);
-
-            return GetWeaponBaseAttack() + strengthBonus + dexterityBonus;
-        }
-        public int GetWeaponAttackForLevel(AttackStatManager attackStatManager, int level)
-        {
-            int strengthBonus = (int)attackStatManager.GetStrengthBonusFromWeapon(this);
-            int dexterityBonus = (int)attackStatManager.GetDexterityBonusFromWeapon(this);
-
-            return CalculateValue(level).physical + strengthBonus + dexterityBonus;
-        }
-        public int GetWeaponFireAttack()
-        {
-            return CalculateValue(this.level).fire;
-        }
-        public int GetWeaponFireAttackForLevel(int level)
-        {
-            return (int)CalculateValue(level).fire;
-        }
-        public int GetWeaponFrostAttack()
-        {
-            return (int)CalculateValue(this.level).frost;
-        }
-        public int GetWeaponFrostAttackForLevel(int level)
-        {
-            return (int)CalculateValue(level).frost;
-        }
-        public int GetWeaponLightningAttack(int playerReputation)
-        {
-            int lightingDamage = CalculateValue(this.level).lightning;
-
-            if (isHolyWeapon && playerReputation > 0)
-            {
-                lightingDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
-            }
-
-            return (int)lightingDamage; ;
-        }
-
-        public int GetBaseWeaponLightningAttack()
-        {
-            return CalculateValue(this.level).lightning;
-        }
-
-        public int GetWeaponLightningAttackForLevel(int level, int playerReputation)
-        {
-            int lightingDamage = CalculateValue(level).lightning;
-
-            if (isHolyWeapon && playerReputation > 0)
-            {
-                lightingDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
-            }
-
-            return (int)lightingDamage;
-        }
-
-        public int GetBaseWeaponDarknessAttack()
-        {
-            return CalculateValue(this.level).darkness;
-        }
-        public int GetWeaponDarknessAttack(int playerReputation)
-        {
-            int darknessDamage = CalculateValue(this.level).darkness;
-
-            if (isHexWeapon && playerReputation < 0)
-            {
-                darknessDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
-            }
-
-            return (int)darknessDamage;
-        }
-
-        public int GetWeaponDarknessAttackForLevel(int level, int playerReputation)
-        {
-            int darknessDamage = CalculateValue(level).darkness;
-
-            if (isHexWeapon && playerReputation < 0)
-            {
-                darknessDamage += (int)Math.Min(100, Mathf.Pow(Mathf.Abs(playerReputation), 1.25f));
-            }
-
-            return (int)darknessDamage;
-        }
-
-        public int GetWeaponWaterAttack()
-        {
-            return (int)CalculateValue(this.level).water;
-        }
-
-        public int GetWeaponWaterAttackForLevel(int level)
-        {
-            return (int)CalculateValue(level).water;
-        }
-
-        public int GetWeaponBaseMagicAttack()
-        {
-            return (int)CalculateValue(this.level).magic;
-        }
-        public int GetWeaponMagicAttack(AttackStatManager attackStatManager)
-        {
-            int baseMagicDamage = (int)CalculateValue(this.level).magic;
-
-            if (baseMagicDamage > 0)
-            {
-                baseMagicDamage += (int)attackStatManager.GetIntelligenceBonusFromWeapon(this);
-            }
-
-            return baseMagicDamage;
-        }
-
-        public int GetWeaponMagicAttackForLevel(int level, AttackStatManager attackStatManager)
-        {
-            int baseMagicDamage = (int)CalculateValue(level).magic;
-
-            if (baseMagicDamage > 0)
-            {
-                baseMagicDamage += (int)attackStatManager.GetIntelligenceBonusFromWeapon(this);
-            }
-
-            return baseMagicDamage;
-        }
-
-        public Damage GetWeaponDamage()
-        {
-            return CalculateValue(this.level);
-        }
-
-        public string GetFormattedStatusDamages()
-        {
-            string result = "";
-
-            foreach (var statusEffect in damage.statusEffects)
-            {
-                if (statusEffect != null)
-                {
-                    result += $"+{statusEffect.amountPerHit} {statusEffect.statusEffect.GetName()} {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Inflicted per Hit")}\n";
-                }
-            }
-
-            return result.TrimEnd();
-        }
 
         public bool CanBeUpgradedFurther()
         {

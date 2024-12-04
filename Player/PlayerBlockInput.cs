@@ -74,6 +74,13 @@ namespace AF
         {
             isBlockInput_Performed = true;
 
+            if (equipmentDatabase.GetCurrentSecondaryWeapon() != null)
+            {
+                isBlockInput_Performed = false;
+                playerManager.playerCombatController.HandleSecondaryAttack();
+                return;
+            }
+
             if (CanBlock())
             {
                 playerManager.characterBlockController.parryTimer = 0f;

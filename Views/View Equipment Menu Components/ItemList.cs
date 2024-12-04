@@ -115,57 +115,62 @@ namespace AF
 
             if (equipmentType == EquipmentType.WEAPON)
             {
-                PopulateScrollView<Weapon>(false, slotIndex);
+                PopulateScrollView<Weapon>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.SHIELD)
             {
-                PopulateScrollView<Shield>(false, slotIndex);
+                PopulateScrollView<Shield>(false, slotIndex, true);
             }
             else if (equipmentType == EquipmentType.ARROW)
             {
-                PopulateScrollView<Arrow>(false, slotIndex);
+                PopulateScrollView<Arrow>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.SPELL)
             {
-                PopulateScrollView<Spell>(false, slotIndex);
+                PopulateScrollView<Spell>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.HELMET)
             {
-                PopulateScrollView<Helmet>(false, slotIndex);
+                PopulateScrollView<Helmet>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.ARMOR)
             {
-                PopulateScrollView<Armor>(false, slotIndex);
+                PopulateScrollView<Armor>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.GAUNTLET)
             {
-                PopulateScrollView<Gauntlet>(false, slotIndex);
+                PopulateScrollView<Gauntlet>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.BOOTS)
             {
-                PopulateScrollView<Legwear>(false, slotIndex);
+                PopulateScrollView<Legwear>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.ACCESSORIES)
             {
-                PopulateScrollView<Accessory>(false, slotIndex);
+                PopulateScrollView<Accessory>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.CONSUMABLES)
             {
-                PopulateScrollView<Consumable>(false, slotIndex);
+                PopulateScrollView<Consumable>(false, slotIndex, false);
             }
             else if (equipmentType == EquipmentType.OTHER_ITEMS)
             {
-                PopulateScrollView<Item>(true, slotIndex);
+                PopulateScrollView<Item>(true, slotIndex, false);
             }
 
             // Delay the focus until the next frame, required as a hack for now
             Invoke(nameof(GiveFocus), 0f);
         }
 
-        bool IsItemEquipped(Item item, int slotIndex)
+        bool IsItemEquipped(Item item, int slotIndex, bool isShieldSlot)
         {
             if (item is Weapon)
             {
+                if (isShieldSlot)
+                {
+                    return equipmentDatabase.secondaryWeapons[slotIndex] == item;
+                }
+
                 return equipmentDatabase.weapons[slotIndex] == item;
             }
             else if (item is Shield)
@@ -261,12 +266,21 @@ namespace AF
             return true;
         }
 
-        void PopulateScrollView<T>(bool showOnlyKeyItems, int slotIndex) where T : Item
+        void PopulateScrollView<T>(bool showOnlyKeyItems, int slotIndex, bool isShieldSlot) where T : Item
         {
             this.itemsScrollView.Clear();
 
             var query = inventoryDatabase.ownedItems
-                .Where(item => ShouldShowItem<T>(item, slotIndex, showOnlyKeyItems));
+                .Where(item =>
+                {
+                    if (isShieldSlot && item.Key is Weapon)
+                    {
+                        return true;
+                    }
+
+                    return ShouldShowItem<T>(item, slotIndex, showOnlyKeyItems);
+                });
+
 
             if (typeof(T) == typeof(Consumable))
             {
@@ -279,7 +293,7 @@ namespace AF
             {
                 var item = filteredItems.ElementAt(i);
 
-                bool isEquipped = IsItemEquipped(item.Key, slotIndex);
+                bool isEquipped = IsItemEquipped(item.Key, slotIndex, isShieldSlot);
 
                 var instance = itemButtonPrefab.CloneTree();
                 instance.Q<VisualElement>("Sprite").style.backgroundImage = new StyleBackground(item.Key.sprite);
@@ -338,12 +352,26 @@ namespace AF
                                     playerManager.statsBonusController.SetIgnoreNextWeaponToEquipRequirements(false);
                                 }
 
-                                playerManager.playerWeaponsManager.EquipWeapon(weapon, slotIndex);
+                                if (isShieldSlot)
+                                {
+                                    playerManager.playerWeaponsManager.EquipSecondaryWeapon(weapon, slotIndex);
+                                }
+                                else
+                                {
+                                    playerManager.playerWeaponsManager.EquipWeapon(weapon, slotIndex);
+                                }
                             }
                         }
                         else
                         {
-                            playerManager.playerWeaponsManager.UnequipWeapon(slotIndex);
+                            if (isShieldSlot)
+                            {
+                                playerManager.playerWeaponsManager.UnequipSecondaryWeapon(slotIndex);
+                            }
+                            else
+                            {
+                                playerManager.playerWeaponsManager.UnequipWeapon(slotIndex);
+                            }
                         }
                     }
                     else if (item.Key is Shield shield)

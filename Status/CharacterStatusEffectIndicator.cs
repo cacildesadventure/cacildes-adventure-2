@@ -1,26 +1,29 @@
-using AF.StatusEffects;
-using UnityEngine;
-using UnityEngine.UI;
-
 namespace AF
 {
+    using AF.StatusEffects;
+    using TMPro;
+    using UnityEngine;
+    using UnityEngine.UI;
 
     public class CharacterStatusEffectIndicator : MonoBehaviour
     {
-        public Image background;
-        public Image fill;
+        public Slider slider;
 
-        private void OnEnable()
-        {
-            background.gameObject.SetActive(true);
-            fill.fillAmount = 0;
-        }
+        public TextMeshProUGUI label;
 
         public void UpdateUI(AppliedStatusEffect statusEffect, float currentMaximumResistanceToStatusEffect)
         {
-            background.enabled = !statusEffect.hasReachedTotalAmount;
+            label.text = statusEffect.hasReachedTotalAmount ? statusEffect.statusEffect.GetAppliedName() : statusEffect.statusEffect.GetName();
+            slider.value = statusEffect.currentAmount;
+            slider.maxValue = currentMaximumResistanceToStatusEffect;
 
-            fill.fillAmount = currentMaximumResistanceToStatusEffect;
+            var colors = slider.colors;
+            colors.normalColor = statusEffect.statusEffect.barColor;
+            colors.highlightedColor = statusEffect.statusEffect.barColor;
+            colors.pressedColor = statusEffect.statusEffect.barColor;
+            colors.selectedColor = statusEffect.statusEffect.barColor;
+            colors.disabledColor = Color.gray;
+            slider.colors = colors;
         }
     }
 

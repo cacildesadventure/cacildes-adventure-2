@@ -12,18 +12,27 @@
         public readonly string hashLightAttack2 = "Light Attack 2";
         public readonly string hashLightAttack3 = "Light Attack 3";
         public readonly string hashLightAttack4 = "Light Attack 4";
+        public readonly string hashLightSecondaryAttack1 = "Light Secondary Attack 1";
+        public readonly string hashLightSecondaryAttack2 = "Light Secondary Attack 2";
+        public readonly string hashLightSecondaryAttack3 = "Light Secondary Attack 3";
+        public readonly string hashLightSecondaryAttack4 = "Light Secondary Attack 4";
+        public readonly string hashLightPowerStancingAttack1 = "Light Power Stance Attack 1";
+        public readonly string hashLightPowerStancingAttack2 = "Light Power Stance Attack 2";
+        public readonly string hashLightPowerStancingAttack3 = "Light Power Stance Attack 3";
+        public readonly string hashLightPowerStancingAttack4 = "Light Power Stance Attack 4";
         public readonly int hashHeavyAttack1 = Animator.StringToHash("Heavy Attack 1");
         public readonly string hashHeavyAttack2 = "Heavy Attack 2";
         public readonly int hashSpecialAttack = Animator.StringToHash("Special Attack");
         public readonly int hashJumpAttack = Animator.StringToHash("Jump Attack");
 
         [Header("Attack Combo Index")]
-        public float maxIdleCombo = 2f;
-        [SerializeField] int lightAttackComboIndex, heavyAttackComboIndex = 0;
+        float maxIdleCombo = 2f;
+        [SerializeField] int lightAttackMainWeaponComboIndex, lightAttackSecondaryWeaponComboIndex, heavyAttackComboIndex = 0;
 
         [Header("Flags")]
         public bool isCombatting = false;
         public bool isLightAttacking = false;
+        public bool isAttackingWithLeftHand = false;
 
         [Header("Components")]
         public PlayerManager playerManager;
@@ -58,6 +67,8 @@
             isJumpAttacking = false;
             isHeavyAttacking = false;
             isLightAttacking = false;
+            isAttackingWithLeftHand = false;
+
             animator.SetFloat(SpeedMultiplierHash, 1f);
         }
 
@@ -65,7 +76,7 @@
         {
             if (CanLightAttack())
             {
-                HandleLightAttack();
+                HandleLightAttack(false);
             }
         }
 
@@ -82,7 +93,17 @@
             return isLightAttacking || isHeavyAttacking || isJumpAttacking;
         }
 
-        public void HandleLightAttack()
+        public void HandleSecondaryAttack()
+        {
+            if (!CanAttack())
+            {
+                return;
+            }
+
+            HandleLightAttack(true);
+        }
+
+        public void HandleLightAttack(bool isSecondaryWeapon)
         {
             isHeavyAttacking = false;
             isLightAttacking = true;
@@ -94,26 +115,41 @@
                     return;
                 }
 
-                if (lightAttackComboIndex > GetMaxLightCombo())
+                if (isSecondaryWeapon)
                 {
-                    lightAttackComboIndex = 0;
-                }
+                    if (lightAttackSecondaryWeaponComboIndex > GetMaxLightSecondaryWeaponCombo())
+                        lightAttackSecondaryWeaponComboIndex = 0;
 
-                if (lightAttackComboIndex == 0)
-                {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack1, crossFade);
+                    if (lightAttackSecondaryWeaponComboIndex == 0)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(
+                            equipmentDatabase.IsPowerStancing() ? hashLightPowerStancingAttack1 : hashLightSecondaryAttack1, crossFade);
+                    else if (lightAttackSecondaryWeaponComboIndex == 1)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(
+                            equipmentDatabase.IsPowerStancing() ? hashLightPowerStancingAttack2 : hashLightSecondaryAttack2, crossFade);
+                    else if (lightAttackSecondaryWeaponComboIndex == 2)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(
+                            equipmentDatabase.IsPowerStancing() ? hashLightPowerStancingAttack3 : hashLightSecondaryAttack3, crossFade);
+                    else if (lightAttackSecondaryWeaponComboIndex == 3)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(
+                            equipmentDatabase.IsPowerStancing() ? hashLightPowerStancingAttack4 : hashLightSecondaryAttack4, crossFade);
+
+                    lightAttackSecondaryWeaponComboIndex++;
                 }
-                else if (lightAttackComboIndex == 1)
+                else
                 {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack2, crossFade);
-                }
-                else if (lightAttackComboIndex == 2)
-                {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack3, crossFade);
-                }
-                else if (lightAttackComboIndex == 3)
-                {
-                    playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack4, crossFade);
+                    if (lightAttackMainWeaponComboIndex > GetMaxLightCombo())
+                        lightAttackMainWeaponComboIndex = 0;
+
+                    if (lightAttackMainWeaponComboIndex == 0)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack1, crossFade);
+                    else if (lightAttackMainWeaponComboIndex == 1)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack2, crossFade);
+                    else if (lightAttackMainWeaponComboIndex == 2)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack3, crossFade);
+                    else if (lightAttackMainWeaponComboIndex == 3)
+                        playerManager.PlayCrossFadeBusyAnimationWithRootMotion(hashLightAttack4, crossFade);
+
+                    lightAttackMainWeaponComboIndex++;
                 }
 
                 HandleAttackSpeed();
@@ -123,34 +159,37 @@
                 HandleJumpAttack();
             }
 
-            lightAttackComboIndex++;
             playerManager.staminaStatManager.DecreaseLightAttackStamina();
 
-            if (ResetLightAttackComboIndexCoroutine != null)
-            {
-                StopCoroutine(ResetLightAttackComboIndexCoroutine);
-            }
-            ResetLightAttackComboIndexCoroutine = StartCoroutine(_ResetLightAttackComboIndex());
+            ResetCombos();
         }
 
         int GetMaxLightCombo()
         {
             int maxCombo = 1;
 
-            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
+            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon() ?? equipmentDatabase.unarmedWeapon;
 
-            if (currentWeapon?.weaponAnimation != null)
+            if (currentWeapon?.weaponClass != null)
             {
-                maxCombo = currentWeapon.weaponAnimation.lightAttackCombos - 1;
+                maxCombo = currentWeapon.weaponClass.lightAttackCombos - 1;
             }
 
             return maxCombo;
         }
 
-        IEnumerator _ResetLightAttackComboIndex()
+        int GetMaxLightSecondaryWeaponCombo()
         {
-            yield return new WaitForSeconds(maxIdleCombo);
-            lightAttackComboIndex = 0;
+            int maxCombo = 1;
+
+            Weapon secondaryWeapon = equipmentDatabase.GetCurrentSecondaryWeapon();
+
+            if (secondaryWeapon?.weaponClass != null)
+            {
+                maxCombo = secondaryWeapon.weaponClass.lightAttackCombos - 1;
+            }
+
+            return maxCombo;
         }
 
         void HandleAttackSpeed()
@@ -229,11 +268,10 @@
         {
             int maxCombo = 0;
 
-            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
-
-            if (currentWeapon?.weaponAnimation != null)
+            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon() ?? equipmentDatabase.unarmedWeapon;
+            if (currentWeapon?.weaponClass != null)
             {
-                maxCombo = currentWeapon.weaponAnimation.heavyAttackCombos - 1;
+                maxCombo = currentWeapon.weaponClass.heavyAttackCombos - 1;
             }
 
             return maxCombo;
@@ -338,15 +376,21 @@
             {
                 damageReceiver.character.health.hasBeenHitWithRequiredWeapon = true;
             }
+        }
+        void ResetCombos()
+        {
+            if (ResetLightAttackComboIndexCoroutine != null)
+            {
+                StopCoroutine(ResetLightAttackComboIndexCoroutine);
+            }
 
-            if (weapon != null)
-            {
-                playerManager.attackStatManager.attackSource = AttackStatManager.AttackSource.WEAPON;
-            }
-            else
-            {
-                playerManager.attackStatManager.attackSource = AttackStatManager.AttackSource.UNARMED;
-            }
+            ResetLightAttackComboIndexCoroutine = StartCoroutine(_ResetLightAttackComboIndex());
+        }
+        IEnumerator _ResetLightAttackComboIndex()
+        {
+            yield return new WaitForSeconds(maxIdleCombo);
+            lightAttackMainWeaponComboIndex = 0;
+            lightAttackSecondaryWeaponComboIndex = 0;
         }
     }
 }

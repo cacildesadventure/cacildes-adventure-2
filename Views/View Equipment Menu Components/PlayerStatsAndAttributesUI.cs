@@ -52,8 +52,24 @@ namespace AF
 
             SetGoldForNextLevelLabel();
 
-            int baseAttack = attackStatManager.GetCurrentAttackForWeapon(equipmentDatabase.GetCurrentWeapon());
-            int itemAttack = GetItemAttack(item, baseAttack);
+            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
+            if (equipmentDatabase.IsUnarmed()) currentWeapon = equipmentDatabase.unarmedWeapon;
+
+            Weapon weaponToEquip = item as Weapon;
+
+            int basePhysicalAttack = currentWeapon.weaponClass.GetCurrentDamage(
+                playerManager,
+                playerManager.statsBonusController.GetCurrentStrength(),
+                playerManager.statsBonusController.GetCurrentDexterity(),
+                playerManager.statsBonusController.GetCurrentIntelligence(),
+                currentWeapon.level).physical;
+
+            int itemPhysicalAttack = weaponToEquip != null ? weaponToEquip.weaponClass.GetCurrentDamage(
+                playerManager,
+                playerManager.statsBonusController.GetCurrentStrength(),
+                playerManager.statsBonusController.GetCurrentDexterity(),
+                playerManager.statsBonusController.GetCurrentIntelligence(),
+                weaponToEquip.level).physical : 0;
 
             // Physical and Elemental Defenses
             int basePhysicalDefense = (int)defenseStatManager.GetDefenseAbsorption();
@@ -90,15 +106,14 @@ namespace AF
             SetWeightLoadLabel("WeightLoad", baseEquipLoad, itemEquipLoad);
             SetStatLabel("Reputation", playerBaseStats.reputation, itemBonusStats.reputation);
 
-            SetStatLabel("PhysicalAttack", baseAttack, itemAttack);
+            SetStatLabel("PhysicalAttack", basePhysicalAttack, itemPhysicalAttack);
 
-            Weapon weapon = item as Weapon;
-            SetAttackLabels(weapon, "FireAttack", WeaponElementType.Fire);
-            SetAttackLabels(weapon, "FrostAttack", WeaponElementType.Frost);
-            SetAttackLabels(weapon, "LightningAttack", WeaponElementType.Lightning);
-            SetAttackLabels(weapon, "MagicAttack", WeaponElementType.Magic);
-            SetAttackLabels(weapon, "DarknessAttack", WeaponElementType.Darkness);
-            SetAttackLabels(weapon, "WaterAttack", WeaponElementType.Water);
+            SetAttackLabels(weaponToEquip, "FireAttack", WeaponElementType.Fire);
+            SetAttackLabels(weaponToEquip, "FrostAttack", WeaponElementType.Frost);
+            SetAttackLabels(weaponToEquip, "LightningAttack", WeaponElementType.Lightning);
+            SetAttackLabels(weaponToEquip, "MagicAttack", WeaponElementType.Magic);
+            SetAttackLabels(weaponToEquip, "DarknessAttack", WeaponElementType.Darkness);
+            SetAttackLabels(weaponToEquip, "WaterAttack", WeaponElementType.Water);
 
             SetStatLabel("PhysicalDefense", basePhysicalDefense, itemDefenses.physical);
             SetStatLabel("FireDefense", (int)playerManager.defenseStatManager.GetFireDefense(), itemDefenses.fire);
@@ -246,25 +261,12 @@ namespace AF
             return (0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
-        private int GetItemAttack(Item item, int baseAttack)
-        {
-            if (item is Weapon weapon)
-            {
-                return (int)attackStatManager.GetWeaponAttack(weapon);
-            }
-            else if (item is Accessory accessory && equipmentDatabase.IsAccessoryEquiped(accessory))
-            {
-                return baseAttack + accessory.physicalAttackBonus;
-            }
-            return 0;
-        }
-
         private void SetAttackLabels(Weapon item, string labelName, WeaponElementType elementType)
         {
             int baseValue = EquipmentUtils.GetElementalAttackForCurrentWeapon(
-                equipmentDatabase.GetCurrentWeapon(), elementType, playerManager.attackStatManager, playerManager.statsBonusController.GetCurrentReputation());
+                equipmentDatabase.GetCurrentWeapon(), elementType, playerManager.attackStatManager);
             int itemValue = EquipmentUtils.GetElementalAttackForCurrentWeapon(
-                item, elementType, playerManager.attackStatManager, playerManager.statsBonusController.GetCurrentReputation());
+                item, elementType, playerManager.attackStatManager);
 
             SetStatLabel(labelName, baseValue, itemValue);
         }

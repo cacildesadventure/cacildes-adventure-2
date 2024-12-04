@@ -105,36 +105,42 @@ namespace AF.Health
         {
             float multiplier = shouldDoubleDamage ? 2 : 1f;
 
+            Damage currentWeaponDamage = currentWeapon.weaponClass.GetCurrentDamage(
+                attackStatManager.playerManager,
+                attackStatManager.playerManager.statsBonusController.GetCurrentStrength(),
+                attackStatManager.playerManager.statsBonusController.GetCurrentDexterity(),
+                attackStatManager.playerManager.statsBonusController.GetCurrentIntelligence(),
+                currentWeapon.level
+            );
+
             if (this.fire > 0)
             {
-                this.fire += (int)(currentWeapon.GetWeaponFireAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.fire += (int)(currentWeaponDamage.fire * multiplier);
             }
 
             if (this.frost > 0)
             {
-                this.frost += (int)(currentWeapon.GetWeaponFrostAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.frost += (int)(currentWeaponDamage.frost * multiplier);
             }
 
             if (this.magic > 0)
             {
-                this.magic += (int)(currentWeapon.GetWeaponMagicAttack(attackStatManager) + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.magic += (int)(currentWeaponDamage.magic * multiplier);
             }
 
             if (this.lightning > 0)
             {
-                this.lightning += (int)(
-                    currentWeapon.GetWeaponLightningAttack(playerReputation) + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.lightning += (int)(currentWeaponDamage.lightning * multiplier);
             }
 
             if (this.darkness > 0)
             {
-                this.darkness += (int)(currentWeapon.GetWeaponDarknessAttack(playerReputation)
-                    + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.darkness += (int)(currentWeaponDamage.darkness * multiplier);
             }
 
             if (this.water > 0)
             {
-                this.water += (int)(currentWeapon.GetWeaponWaterAttack() + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon) * multiplier);
+                this.water += (int)(currentWeaponDamage.water * multiplier);
             }
 
             if (this.pushForce > 0 && isFaithSpell)
@@ -142,10 +148,7 @@ namespace AF.Health
                 this.pushForce += playerReputation > 0 ? (playerReputation * 0.1f) : 0;
             }
 
-            Damage weaponDamage = currentWeapon.GetWeaponDamage();
-
-
-            if (weaponDamage.statusEffects != null && weaponDamage.statusEffects.Length > 0)
+            if (currentWeaponDamage.statusEffects != null && currentWeaponDamage.statusEffects.Length > 0)
             {
                 List<StatusEffectEntry> updatedStatusEffects = new List<StatusEffectEntry>();
 
@@ -156,7 +159,7 @@ namespace AF.Health
                 }
 
                 // Then, combine with weapon status effects
-                foreach (StatusEffectEntry weaponStatusEffectEntry in weaponDamage.statusEffects)
+                foreach (StatusEffectEntry weaponStatusEffectEntry in currentWeaponDamage.statusEffects)
                 {
                     StatusEffectEntry existingEffect = updatedStatusEffects.Find(x => x.statusEffect == weaponStatusEffectEntry.statusEffect);
 
@@ -173,7 +176,11 @@ namespace AF.Health
                     else
                     {
                         // Add a new copy of the weapon status effect
-                        updatedStatusEffects.Add(new StatusEffectEntry() { amountPerHit = weaponStatusEffectEntry.amountPerHit, statusEffect = weaponStatusEffectEntry.statusEffect });
+                        updatedStatusEffects.Add(new StatusEffectEntry()
+                        {
+                            amountPerHit = weaponStatusEffectEntry.amountPerHit,
+                            statusEffect = weaponStatusEffectEntry.statusEffect
+                        });
                     }
                 }
 
@@ -183,20 +190,28 @@ namespace AF.Health
 
         public void ScaleProjectile(AttackStatManager attackStatManager, Weapon currentWeapon)
         {
+            Damage currentWeaponDamage = currentWeapon.weaponClass.GetCurrentDamage(
+                attackStatManager.playerManager,
+                attackStatManager.playerManager.statsBonusController.GetCurrentStrength(),
+                attackStatManager.playerManager.statsBonusController.GetCurrentDexterity(),
+                attackStatManager.playerManager.statsBonusController.GetCurrentIntelligence(),
+                currentWeapon.level
+            );
+
             // Steel arrow might inherit magic from a magical bow, hence don't check if base values are greater than zero
-            this.physical += (int)(currentWeapon.GetWeaponAttack(attackStatManager) + attackStatManager.GetDexterityBonusFromWeapon(currentWeapon));
+            this.physical += currentWeaponDamage.physical;
 
             if (attackStatManager.playerManager.statsBonusController.projectileMultiplierBonus > 0f)
             {
                 this.physical = (int)(this.physical * attackStatManager.playerManager.statsBonusController.projectileMultiplierBonus);
             }
 
-            this.fire += (int)currentWeapon.GetWeaponFireAttack();
-            this.frost += (int)currentWeapon.GetWeaponFrostAttack();
-            this.magic += (int)(currentWeapon.GetWeaponMagicAttack(attackStatManager) + attackStatManager.GetIntelligenceBonusFromWeapon(currentWeapon));
-            this.lightning += (int)currentWeapon.GetWeaponLightningAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation());
-            this.darkness += (int)currentWeapon.GetWeaponDarknessAttack(attackStatManager.playerStatsDatabase.GetCurrentReputation());
-            this.water += (int)currentWeapon.GetWeaponWaterAttack();
+            this.fire += currentWeaponDamage.fire;
+            this.frost += currentWeaponDamage.frost;
+            this.magic += currentWeaponDamage.magic;
+            this.lightning += currentWeaponDamage.lightning;
+            this.darkness += currentWeaponDamage.darkness;
+            this.water += currentWeaponDamage.water;
         }
 
 
