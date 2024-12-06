@@ -59,7 +59,7 @@ namespace AF
 
         public Damage OnDamageEvent(CharacterBaseManager attacker, CharacterBaseManager receiver, Damage incomingDamage)
         {
-            if (incomingDamage == null || !CanBlockDamage(incomingDamage))
+            if (incomingDamage == null || !CanBlockDamage(incomingDamage) || attacker == null)
             {
                 return incomingDamage;
             }

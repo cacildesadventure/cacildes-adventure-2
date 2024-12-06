@@ -1,22 +1,29 @@
-using System.Collections;
-using System.Linq;
-using AF.Dialogue;
-using UnityEngine;
 
 namespace AF
 {
+    using System.Collections;
+    using System.Linq;
+    using AF.Dialogue;
+    using UnityEngine;
+    using UnityEngine.Localization.Settings;
+
+    [RequireComponent(typeof(MonoBehaviourID))]
     public class EV_SimpleMessage : EventBase
     {
-
-
-        [Header("Actor")]
         public Character character;
 
         [TextAreaAttribute(minLines: 10, maxLines: 20)]
-        public string message;
+        [HideInInspector] public string message;
+        [TextAreaAttribute(minLines: 10, maxLines: 20)]
+        public string englishMessage;
+
+        [TextAreaAttribute(minLines: 10, maxLines: 20)]
+        public string portugueseMessage;
 
         [Header("Responses")]
         public Response[] responses;
+
+        [HideInInspector] public MonoBehaviourID monoBehaviourID => GetComponent<MonoBehaviourID>();
 
         // Scene Refs
         UIDocumentDialogueWindow uIDocumentDialogueWindow;
@@ -27,7 +34,7 @@ namespace AF
             Response[] filteredResponses = responses.Where(response => response.gameObject.activeInHierarchy).ToArray();
 
             yield return GetUIDocumentDialogueWindow().DisplayMessage(
-                character, message, filteredResponses);
+                character, LocalizationSettings.StringDatabase.GetLocalizedString("Dialogues", monoBehaviourID.ID), filteredResponses);
         }
 
         private void OnDisable()

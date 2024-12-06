@@ -100,6 +100,8 @@
                 return;
             }
 
+            isAttackingWithLeftHand = true;
+
             HandleLightAttack(true);
         }
 
@@ -194,19 +196,16 @@
 
         void HandleAttackSpeed()
         {
-            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
-            if (equipmentDatabase.isTwoHanding == false && currentWeapon != null && currentWeapon.oneHandAttackSpeedPenalty != 1)
-            {
-                animator.SetFloat(SpeedMultiplierHash, currentWeapon.oneHandAttackSpeedPenalty);
-            }
-            else if (equipmentDatabase.isTwoHanding && currentWeapon != null && currentWeapon.twoHandAttackSpeedPenalty != 1)
+            Weapon currentWeapon = isAttackingWithLeftHand ? equipmentDatabase.GetCurrentSecondaryWeapon() : equipmentDatabase.GetCurrentWeapon();
+            if (currentWeapon == null) currentWeapon = equipmentDatabase.unarmedWeapon;
+
+            if (equipmentDatabase.isTwoHanding)
             {
                 animator.SetFloat(SpeedMultiplierHash, currentWeapon.twoHandAttackSpeedPenalty);
+                return;
             }
-            else
-            {
-                animator.SetFloat(SpeedMultiplierHash, 1f);
-            }
+
+            animator.SetFloat(SpeedMultiplierHash, currentWeapon.oneHandAttackSpeedPenalty);
         }
 
         void HandleJumpAttack()

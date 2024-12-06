@@ -10,6 +10,7 @@ namespace AF
         [Header("Components")]
         public CharacterBaseManager characterManager;
         public string hashParried = "Parried";
+        public string hashParrying = "Parrying";
 
         [Header("Parrying Settings")]
         public UnityEvent onParryEvent;
@@ -127,6 +128,9 @@ namespace AF
             {
                 StopCoroutine(counterAttackWindowCoroutine);
             }
+
+            characterManager.PlayBusyAnimationWithRootMotion(hashParrying);
+
             counterAttackWindowCoroutine = StartCoroutine(HandleCounterAttackWindowCoroutine());
         }
 

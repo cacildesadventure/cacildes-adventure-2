@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace AF.Tutorial
+namespace AF
 {
     public class TutorialTeleport : MonoBehaviour
     {

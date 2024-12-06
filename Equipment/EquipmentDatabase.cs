@@ -140,6 +140,7 @@ namespace AF
         public void EquipSecondaryWeapon(Weapon weapon, int slotIndex)
         {
             secondaryWeapons[slotIndex] = weapon;
+            shields[slotIndex] = null;
 
             EventManager.EmitEvent(EventMessages.ON_EQUIPMENT_CHANGED);
         }
@@ -166,6 +167,7 @@ namespace AF
         public void EquipShield(Shield shield, int slotIndex)
         {
             shields[slotIndex] = shield;
+            secondaryWeapons[slotIndex] = null;
             EventManager.EmitEvent(EventMessages.ON_EQUIPMENT_CHANGED);
             EventManager.EmitEvent(EventMessages.ON_SHIELD_EQUIPMENT_CHANGED);
         }

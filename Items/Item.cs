@@ -1,20 +1,25 @@
-﻿using AF.Inventory;
-using AYellowpaper.SerializedCollections;
-using UnityEngine;
-using UnityEngine.Localization;
-
+﻿
 namespace AF
 {
+    using AYellowpaper.SerializedCollections;
+    using UnityEngine;
+    using UnityEngine.Localization;
+
     [CreateAssetMenu(menuName = "Items / Item / New Item")]
     public class Item : ScriptableObject
     {
+
+        public string englishName;
+        public string portugueseName;
+        [TextAreaAttribute(minLines: 2, maxLines: 10)] public string englishDescription;
+        [TextAreaAttribute(minLines: 2, maxLines: 10)] public string portugueseDescription;
+
 
         [Header("Localization")]
         public LocalizedString nameLocalized;
         public LocalizedString descriptionLocalized;
         public LocalizedString shortDescriptionLocalized;
 
-        [Header("UI")]
         public Sprite sprite;
 
         [Header("Value")]

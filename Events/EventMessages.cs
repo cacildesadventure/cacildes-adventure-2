@@ -49,6 +49,8 @@ namespace AF.Events
 
         public static readonly string ON_PLAYER_HUD_VISIBILITY_CHANGED = "ON_PLAYER_HUD_VISIBILITY_CHANGED";
 
+        // Tutorials
+        public static readonly string ON_TUTORIAL_SET = "ON_TUTORIAL_SET";
 
     }
 }

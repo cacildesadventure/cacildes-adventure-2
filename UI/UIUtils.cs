@@ -144,5 +144,29 @@ namespace AF
                 scroller.Q<VisualElement>("unity-slider").Q<VisualElement>().focusable = false;
             }
         }
+
+        public static void PlayFadeInAnimation(VisualElement element, float duration)
+        {
+            element.style.opacity = 0; // Start fully transparent
+
+            DOTween.To(
+                () => element.style.opacity.value,
+                opacity => element.style.opacity = opacity,
+                1f, // Target full opacity
+                duration
+            ).SetEase(Ease.InOutQuad);
+        }
+
+        public static void PlayFadeOutAnimation(VisualElement element, float duration)
+        {
+            element.style.opacity = 1; // Ensure starting from fully visible
+
+            DOTween.To(
+                () => element.style.opacity.value,
+                opacity => element.style.opacity = opacity,
+                0f, // Target fully transparent
+                duration
+            ).SetEase(Ease.InOutQuad);
+        }
     }
 }

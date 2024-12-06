@@ -206,7 +206,7 @@ namespace AF
         {
             foreach (var animationOverride in clips)
             {
-                clipOverrides[animationOverride.animationName] = animationOverride.animationClip;
+                clipOverrides[animationOverride.animationOverrideKey.name] = animationOverride.animationClip;
                 animatorOverrideController.ApplyOverrides(clipOverrides);
             }
 

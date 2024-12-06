@@ -1,8 +1,9 @@
-using UnityEngine;
-using System.Collections.Generic;
-
-namespace AF.Animations
+namespace AF
 {
+    using UnityEngine;
+    using System.Collections.Generic;
+    using System;
+
     public class AnimationClipOverrides : List<KeyValuePair<AnimationClip, AnimationClip>>
     {
         public AnimationClipOverrides(int capacity) : base(capacity) { }
@@ -23,6 +24,9 @@ namespace AF.Animations
     [System.Serializable]
     public class AnimationOverride
     {
+        public AnimationOverrideKey animationOverrideKey;
+
+        [Obsolete]
         public string animationName;
         public AnimationClip animationClip;
     }

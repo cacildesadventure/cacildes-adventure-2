@@ -4,6 +4,7 @@ using UnityEngine.Events;
 using static UnityEngine.InputSystem.InputActionRebindingExtensions;
 using System.Collections;
 using AF.UI.EquipmentMenu;
+using TigerForge;
 
 namespace AF
 {
@@ -73,6 +74,9 @@ namespace AF
 		public ViewSettingsLoad[] viewSettingsLoad;
 		public PlayerCamera playerCamera;
 
+		[Header("Tutorial Events")]
+		public TutorialEventMessage jumpEventMessage;
+
 		private void Awake()
 		{
 			scaleVector = new(gameSettings.cameraSensitivity, gameSettings.cameraSensitivity);
@@ -103,6 +107,8 @@ namespace AF
 		public void OnJump(InputValue value)
 		{
 			jump = value.isPressed;
+
+			EventManager.EmitEvent(jumpEventMessage.name);
 		}
 
 		public void OnSprint(InputValue value)

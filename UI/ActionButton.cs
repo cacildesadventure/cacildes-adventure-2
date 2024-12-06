@@ -96,7 +96,7 @@ namespace AF.UI
             background.style.height = 24;
             background.style.unityBackgroundImageTintColor = keyboardBackgroundColor;
 
-            string rebindedKey = starterAssetsInputs.GetCurrentKeyBindingForAction(actionName);
+            string rebindedKey = starterAssetsInputs?.GetCurrentKeyBindingForAction(actionName);
             Label keyLabel = new Label(rebindedKey);
             keyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             keyLabel.style.fontSize = 20;
@@ -155,6 +155,7 @@ namespace AF.UI
         private Label CreateDescriptionLabel()
         {
             Label descriptionLabel = new Label();
+            descriptionLabel.name = "Description";
             descriptionLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             descriptionLabel.style.fontSize = 20;
             descriptionLabel.style.color = Color.white;

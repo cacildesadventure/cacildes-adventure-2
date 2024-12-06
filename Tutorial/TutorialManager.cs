@@ -1,81 +1,55 @@
 
-using System;
-using UnityEngine;
-using UnityEngine.Scripting;
-
-namespace AF.Tutorial
+namespace AF
 {
-    [Preserve] // PreserveAttribute prevents byte code stripping from removing a class, method, field, or property. This class has unity event references only, so unity is ignoring it when producing the build :O
+    using AF.Events;
+    using TigerForge;
+    using UnityEditor;
+    using UnityEngine;
 
-    public class TutorialManager : MonoBehaviour
+    [CreateAssetMenu(fileName = "New Tutorial Manager", menuName = "System/New Tutorial Manager", order = 0)]
+    public class TutorialManager : ScriptableObject
     {
-        [SerializeField] private TutorialSection[] tutorialSections;
-        [SerializeField] private TutorialSection startingTutorial;
+        public Tutorial currentTutorial;
+        public Tutorial.TutorialStep currentStep;
 
-        private TutorialSection activeTutorialSection;
+        [Header("Data")]
+        public Sprite uncheckIcon;
+        public Sprite checkIcon;
 
-        void Start()
+        public Color goldColor;
+        public Font font;
+
+#if UNITY_EDITOR
+        private void OnEnable()
         {
-            InitializeTutorials();
+
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
 
-        private void InitializeTutorials()
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            DisableAllTutorials();
-
-            if (startingTutorial != null)
+            if (state == PlayModeStateChange.ExitingPlayMode)
             {
-                activeTutorialSection = startingTutorial;
-            }
-            else if (tutorialSections.Length > 0)
-            {
-                activeTutorialSection = tutorialSections[0];
-            }
-
-            if (activeTutorialSection != null)
-            {
-                activeTutorialSection.gameObject.SetActive(true);
-                activeTutorialSection.Activate();
+                currentTutorial = null;
+                currentStep = null;
             }
         }
-
-        private void DisableAllTutorials()
+#endif
+        public void SetTutorial(Tutorial tutorial)
         {
-            foreach (var tutorial in tutorialSections)
+            if (tutorial == null || tutorial.tutorialSteps.Length == 0)
             {
-                if (tutorial != null)
-                {
-                    tutorial.gameObject.SetActive(false);
-                }
+                return;
             }
+
+            this.currentTutorial = tutorial;
+            this.currentStep = tutorial.tutorialSteps[0];
+
+            EventManager.EmitEvent(EventMessages.ON_TUTORIAL_SET);
         }
-
-        public void Advance()
+        public void EndTutorial()
         {
-            ChangeTutorialSection(1);
-        }
-
-        public void Return()
-        {
-            ChangeTutorialSection(-1);
-        }
-
-        private void ChangeTutorialSection(int direction)
-        {
-            int currentIndex = Array.IndexOf(tutorialSections, activeTutorialSection);
-
-            if (currentIndex >= 0)
-            {
-                int newIndex = currentIndex + direction;
-
-                if (newIndex >= 0 && newIndex < tutorialSections.Length)
-                {
-                    activeTutorialSection.gameObject.SetActive(false);
-                    activeTutorialSection = tutorialSections[newIndex];
-                    activeTutorialSection.gameObject.SetActive(true);
-                    activeTutorialSection.Activate();
-                }
-            }
+            this.currentTutorial = null;
         }
     }
 }

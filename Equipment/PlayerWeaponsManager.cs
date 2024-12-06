@@ -21,6 +21,7 @@ namespace AF.Equipment
         public List<CharacterWeaponHitbox> weaponInstances;
         public List<CharacterWeaponHitbox> secondaryWeaponInstances;
         public List<ShieldInstance> shieldInstances;
+        public List<HolsteredWeapon> holsteredWeapons;
 
         [Header("Current Weapon")]
         public CharacterWeaponHitbox currentWeaponInstance;
@@ -55,7 +56,11 @@ namespace AF.Equipment
                 EventMessages.ON_EQUIPMENT_CHANGED,
                 UpdateEquipment);
 
-            EventManager.StartListening(EventMessages.ON_TWO_HANDING_CHANGED, UpdateCurrentShield);
+            EventManager.StartListening(EventMessages.ON_TWO_HANDING_CHANGED, () =>
+            {
+                UpdateCurrentWeapon();
+                UpdateCurrentShield();
+            });
         }
 
         private void Start()
@@ -106,6 +111,10 @@ namespace AF.Equipment
                 weaponHitbox?.DisableHitbox();
                 weaponHitbox?.gameObject.SetActive(false);
             }
+            foreach (HolsteredWeapon holsteredWeapon in holsteredWeapons)
+            {
+                holsteredWeapon?.gameObject.SetActive(false);
+            }
 
             if (CurrentWeapon != null)
             {
@@ -116,9 +125,16 @@ namespace AF.Equipment
 
             if (SecondaryWeapon != null)
             {
-                var gameObjectWeapon = secondaryWeaponInstances.FirstOrDefault(x => x.weapon == SecondaryWeapon);
-                secondaryWeaponInstance = gameObjectWeapon;
-                secondaryWeaponInstance.gameObject.SetActive(true);
+                if (equipmentDatabase.isTwoHanding)
+                {
+                    holsteredWeapons.FirstOrDefault(holsteredWeapon => holsteredWeapon.weapon == SecondaryWeapon)?.gameObject.SetActive(true);
+                }
+                else
+                {
+                    var gameObjectWeapon = secondaryWeaponInstances.FirstOrDefault(x => x.weapon == SecondaryWeapon);
+                    secondaryWeaponInstance = gameObjectWeapon;
+                    secondaryWeaponInstance.gameObject.SetActive(true);
+                }
             }
 
             playerManager.UpdateAnimatorOverrideControllerClips();

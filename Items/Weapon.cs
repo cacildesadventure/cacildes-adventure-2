@@ -62,7 +62,6 @@ namespace AF
     [CreateAssetMenu(menuName = "Items / Weapon / New Weapon")]
     public class Weapon : Item
     {
-        [Header("Base Class")]
         public WeaponClass weaponClass;
 
 
@@ -80,7 +79,6 @@ namespace AF
         //        [Range(0, 100)] public int blockAbsorption = 75;
         //        public float blockStaminaCost = 30f;
 
-        [Header("Requirements")]
         public int strengthRequired = 0;
         public int dexterityRequired = 0;
         public int intelligenceRequired = 0;
@@ -117,8 +115,6 @@ namespace AF
         [Header("Dual Wielding Options")]
         public bool halveDamage = false;
 
-        [Header("Speed Penalty")]
-        [Tooltip("Will be added as a negative speed to the animator when equipped")]
         public float speedPenalty = 0f;
         [Range(0.1f, 2f)] public float oneHandAttackSpeedPenalty = 1f;
         [Range(0.1f, 2f)] public float twoHandAttackSpeedPenalty = 1f;
@@ -130,7 +126,6 @@ namespace AF
         public bool doubleDamageDuringDayTime = false;
         public int healthRestoredWithEachHit = 0;
 
-        [Header("Jump Attack")]
         public float jumpAttackVelocity = -5f;
 
         [Header("Is Holy?")]

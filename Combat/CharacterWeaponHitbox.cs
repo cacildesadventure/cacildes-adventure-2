@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using AF.Combat;
-using AF.Health;
-using UnityEngine;
-using UnityEngine.Events;
-
-namespace AF
+﻿namespace AF
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using AF.Combat;
+    using UnityEngine;
+    using UnityEngine.Events;
+
     public class CharacterWeaponHitbox : MonoBehaviour
     {
         [Header("Weapon")]
@@ -50,11 +48,8 @@ namespace AF
 
         List<BoxCollider> ownColliders = new();
 
-
         // Useful for throwable weapon situation
         [HideInInspector] public bool shouldDisableHitboxOnStart = true;
-
-
 
         private void Awake()
         {
