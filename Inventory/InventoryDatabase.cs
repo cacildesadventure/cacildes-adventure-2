@@ -99,6 +99,7 @@ namespace AF.Inventory
             consumable.value = userCreatedItem.value;
             consumable.sprite = userCreatedItem.itemThumbnail;
             consumable.name = userCreatedItem.itemName;
+            consumable.isUserCreatedItem = true;
 
             var statusEffectsWhenConsumed = new List<StatusEffect>();
             statusEffectsWhenConsumed.AddRange(userCreatedItem.positiveEffects);

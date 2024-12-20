@@ -7,7 +7,7 @@ namespace AF.Particles
     {
         public Transform target;
 
-        public ParticleSystem particleSystem;
+        public new ParticleSystem particleSystem;
 
         [Header("Options")]
         public bool adjustGravityModifierBasedOnDistanceToTarget = true;
@@ -15,7 +15,7 @@ namespace AF.Particles
 
         private void Awake()
         {
-            defaultGravityModifier = particleSystem.gravityModifier;
+            defaultGravityModifier = particleSystem.main.gravityModifierMultiplier;
         }
 
         public void Align()

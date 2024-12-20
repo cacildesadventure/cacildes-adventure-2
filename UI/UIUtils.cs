@@ -72,7 +72,7 @@ namespace AF
 
         public static void PlayPopAnimation(VisualElement button)
         {
-            PlayPopAnimation(button, Vector3.zero, 0.5f);
+            PlayPopAnimation(button, new(0.85f, 0.85f, 0.85f), 0.5f);
         }
 
         public static void PlayPopAnimation(VisualElement button, Vector3 startingScale, float duration)

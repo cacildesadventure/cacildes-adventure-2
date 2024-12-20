@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using AF.Loading;
 using UnityEngine.Localization.Settings;
+using System.Collections.Generic;
 
 namespace AF
 {
@@ -131,12 +132,27 @@ namespace AF
 
             foreach (var ownedItem in inventoryDatabase.ownedItems)
             {
+                if (ownedItem.Key.isUserCreatedItem)
+                {
+                    continue;
+                }
+
                 string path = Utils.GetItemPath(ownedItem.Key);
 
                 if (!keyValuePairs.ContainsKey(path))
                 {
                     keyValuePairs.Add(path, ownedItem.Value);
                 }
+            }
+
+            quickSaveWriter.Write("ownedItems", keyValuePairs);
+
+            SerializedDictionary<string, SerializedUserCreatedItem> serializedUserCreatedItems = new();
+
+            foreach (var userCreatedItem in inventoryDatabase.userCreatedItems)
+            {
+
+
             }
 
             quickSaveWriter.Write("ownedItems", keyValuePairs);

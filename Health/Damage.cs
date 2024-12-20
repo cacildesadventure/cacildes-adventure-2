@@ -105,12 +105,12 @@ namespace AF.Health
         {
             float multiplier = shouldDoubleDamage ? 2 : 1f;
 
-            Damage currentWeaponDamage = currentWeapon.weaponClass.GetCurrentDamage(
+            Damage currentWeaponDamage = currentWeapon.weaponDamage.GetCurrentDamage(
                 attackStatManager.playerManager,
                 attackStatManager.playerManager.statsBonusController.GetCurrentStrength(),
                 attackStatManager.playerManager.statsBonusController.GetCurrentDexterity(),
                 attackStatManager.playerManager.statsBonusController.GetCurrentIntelligence(),
-                currentWeapon.level
+                currentWeapon
             );
 
             if (this.fire > 0)
@@ -190,12 +190,12 @@ namespace AF.Health
 
         public void ScaleProjectile(AttackStatManager attackStatManager, Weapon currentWeapon)
         {
-            Damage currentWeaponDamage = currentWeapon.weaponClass.GetCurrentDamage(
+            Damage currentWeaponDamage = currentWeapon.weaponDamage.GetCurrentDamage(
                 attackStatManager.playerManager,
                 attackStatManager.playerManager.statsBonusController.GetCurrentStrength(),
                 attackStatManager.playerManager.statsBonusController.GetCurrentDexterity(),
                 attackStatManager.playerManager.statsBonusController.GetCurrentIntelligence(),
-                currentWeapon.level
+                currentWeapon
             );
 
             // Steel arrow might inherit magic from a magical bow, hence don't check if base values are greater than zero

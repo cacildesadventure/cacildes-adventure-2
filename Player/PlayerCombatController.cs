@@ -172,9 +172,9 @@
 
             Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon() ?? equipmentDatabase.unarmedWeapon;
 
-            if (currentWeapon?.weaponClass != null)
+            if (currentWeapon?.weaponAnimations != null)
             {
-                maxCombo = currentWeapon.weaponClass.lightAttackCombos - 1;
+                maxCombo = currentWeapon.weaponAnimations.lightAttackCombos - 1;
             }
 
             return maxCombo;
@@ -186,9 +186,9 @@
 
             Weapon secondaryWeapon = equipmentDatabase.GetCurrentSecondaryWeapon();
 
-            if (secondaryWeapon?.weaponClass != null)
+            if (secondaryWeapon?.weaponAnimations != null)
             {
-                maxCombo = secondaryWeapon.weaponClass.lightAttackCombos - 1;
+                maxCombo = secondaryWeapon.weaponAnimations.lightAttackCombos - 1;
             }
 
             return maxCombo;
@@ -268,9 +268,9 @@
             int maxCombo = 0;
 
             Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon() ?? equipmentDatabase.unarmedWeapon;
-            if (currentWeapon?.weaponClass != null)
+            if (currentWeapon?.weaponAnimations != null)
             {
-                maxCombo = currentWeapon.weaponClass.heavyAttackCombos - 1;
+                maxCombo = currentWeapon.weaponAnimations.heavyAttackCombos - 1;
             }
 
             return maxCombo;

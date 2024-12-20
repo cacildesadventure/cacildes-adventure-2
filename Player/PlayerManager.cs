@@ -178,16 +178,16 @@ namespace AF
 
             if (currentWeapon != null)
             {
-                if (currentWeapon.weaponClass != null && currentWeapon.weaponClass.baseAnimationOverrides.Count > 0)
+                if (currentWeapon.weaponAnimations != null && currentWeapon.weaponAnimations.baseAnimationOverrides.Count > 0)
                 {
-                    UpdateAnimationOverrides(animator, clipOverrides, currentWeapon.weaponClass.baseAnimationOverrides);
+                    UpdateAnimationOverrides(animator, clipOverrides, currentWeapon.weaponAnimations.baseAnimationOverrides);
                 }
 
-                if (equipmentDatabase.isTwoHanding && currentWeapon?.weaponClass?.twoHandOverrides?.Any() == true)
+                if (equipmentDatabase.isTwoHanding && currentWeapon?.weaponAnimations?.twoHandOverrides?.Any() == true)
                 {
                     List<AnimationOverride> animationOverrides = new();
-                    animationOverrides.AddRange(currentWeapon.weaponClass.twoHandOverrides);
-                    animationOverrides.AddRange(currentWeapon.weaponClass.blockOverrides);
+                    animationOverrides.AddRange(currentWeapon.weaponAnimations.twoHandOverrides);
+                    animationOverrides.AddRange(currentWeapon.weaponAnimations.blockOverrides);
                     UpdateAnimationOverrides(animator, clipOverrides, animationOverrides);
                 }
             }
@@ -195,9 +195,9 @@ namespace AF
             Weapon secondaryWeapon = equipmentDatabase.GetCurrentSecondaryWeapon();
             if (secondaryWeapon != null)
             {
-                if (secondaryWeapon.weaponClass != null && secondaryWeapon.weaponClass.secondaryWeaponOverrides.Count > 0)
+                if (secondaryWeapon.weaponAnimations != null && secondaryWeapon.weaponAnimations.secondaryWeaponOverrides.Count > 0)
                 {
-                    UpdateAnimationOverrides(animator, clipOverrides, secondaryWeapon.weaponClass.secondaryWeaponOverrides);
+                    UpdateAnimationOverrides(animator, clipOverrides, secondaryWeapon.weaponAnimations.secondaryWeaponOverrides);
                 }
             }
         }

@@ -33,6 +33,7 @@ namespace AF.Stats
         public float darkDefenseBonus = 0;
         public float waterDefenseBonus = 0;
         public float additionalCoinPercentage = 0;
+        public float coinMultiplierPerFallenEnemy = 1f;
         public int parryPostureDamageBonus = 0;
         public float parryPostureWindowBonus = 0;
         public int reputationBonus = 0;
@@ -89,6 +90,19 @@ namespace AF.Stats
             UpdateStatusEffectResistances();
             UpdateAttributes();
             UpdateAdditionalCoinPercentage();
+
+            UpdateWeaponBonuses();
+        }
+
+        void UpdateWeaponBonuses()
+        {
+            Weapon currentWeapon = equipmentDatabase.GetCurrentWeapon();
+            if (currentWeapon == null)
+            {
+                return;
+            }
+
+            coinMultiplierPerFallenEnemy += currentWeapon.coinMultiplierPerFallenEnemy;
         }
 
         void UpdateStatusEffectCancellationRates()
@@ -285,6 +299,8 @@ namespace AF.Stats
             shouldRegenerateMana = chanceToRestoreHealthUponDeath = canRage = chanceToNotLoseItemUponConsumption = increaseAttackPowerWhenUnarmed = false;
 
             twoHandAttackBonusMultiplier = slashDamageMultiplier = pierceDamageMultiplier = bluntDamageMultiplier = 0f;
+
+            coinMultiplierPerFallenEnemy = 1f;
         }
 
         void ApplyWeaponAttributes(Weapon currentWeapon)
@@ -418,23 +434,6 @@ namespace AF.Stats
         float GetEquipmentCoinPercentage(ArmorBase equipment)
         {
             return equipment != null ? equipment.additionalCoinPercentage : 0f;
-        }
-
-        public bool ShouldDoubleCoinFromFallenEnemy()
-        {
-            bool hasDoublingCoinAccessoryEquipped = equipmentDatabase.accessories.Any(acc => acc != null && acc.chanceToDoubleCoinsFromFallenEnemies);
-
-            if (equipmentDatabase.GetCurrentWeapon() != null && equipmentDatabase.GetCurrentWeapon().doubleCoinsUponKillingEnemies)
-            {
-                return true;
-            }
-
-            if (!hasDoublingCoinAccessoryEquipped)
-            {
-                return false;
-            }
-
-            return Random.Range(0, 1f) <= 0.05f;
         }
 
         public int GetCurrentIntelligence()

@@ -9,7 +9,7 @@ namespace AF
             return LocalizationSettings.StringDatabase.GetLocalizedString("Glossary", key);
         }
 
-        static bool IsPortuguese()
+        public static bool IsPortuguese()
         {
             if (LocalizationSettings.SelectedLocale.Identifier.Code == "pt")
             {

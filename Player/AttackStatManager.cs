@@ -54,12 +54,12 @@
 
         Damage GetDamageForWeapon(Weapon weapon)
         {
-            Damage weaponDamage = weapon.weaponClass.GetCurrentDamage(
+            Damage weaponDamage = weapon.weaponDamage.GetCurrentDamage(
                 playerManager,
                 playerManager.statsBonusController.GetCurrentStrength(),
                 playerManager.statsBonusController.GetCurrentDexterity(),
                 playerManager.statsBonusController.GetCurrentIntelligence(),
-                weapon.level);
+                weapon);
 
             return playerManager.playerWeaponsManager.GetBuffedDamage(weaponDamage);
         }

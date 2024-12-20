@@ -127,13 +127,30 @@ namespace AF.Equipment
             {
                 if (equipmentDatabase.isTwoHanding)
                 {
-                    holsteredWeapons.FirstOrDefault(holsteredWeapon => holsteredWeapon.weapon == SecondaryWeapon)?.gameObject.SetActive(true);
+                    var holsteredWeapon = holsteredWeapons.FirstOrDefault(holsteredWeapon => holsteredWeapon.weapon == SecondaryWeapon);
+
+                    if (holsteredWeapon != null)
+                    {
+                        holsteredWeapon.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogError("Missing Holstered Weapon for secondary weapon: " + SecondaryWeapon?.name);
+                    }
                 }
                 else
                 {
                     var gameObjectWeapon = secondaryWeaponInstances.FirstOrDefault(x => x.weapon == SecondaryWeapon);
-                    secondaryWeaponInstance = gameObjectWeapon;
-                    secondaryWeaponInstance.gameObject.SetActive(true);
+
+                    if (gameObjectWeapon != null)
+                    {
+                        secondaryWeaponInstance = gameObjectWeapon;
+                        secondaryWeaponInstance.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogError("Missing Secondary Weapon instance for secondary weapon: " + SecondaryWeapon?.name);
+                    }
                 }
             }
 

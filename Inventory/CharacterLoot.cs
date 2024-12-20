@@ -65,10 +65,10 @@ namespace AF
                     goldToReceive += (int)Mathf.Ceil(goldToReceive * additionalCoinPercentage / 100);
                 }
 
-                if (statsBonus.ShouldDoubleCoinFromFallenEnemy())
-                {
-                    goldToReceive *= 2;
-                }
+
+
+                goldToReceive = (int)(goldToReceive * statsBonus.coinMultiplierPerFallenEnemy);
+
             }
 
             return goldToReceive;

@@ -1,142 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AF.Animations;
-using AF.Health;
-using AF.Stats;
-using AYellowpaper.SerializedCollections;
-using UnityEditor;
-using UnityEngine;
-using UnityEngine.Localization.Settings;
-
+﻿
 namespace AF
 {
-
-    public enum WeaponAttackType
-    {
-        Slash,
-        Pierce,
-        Blunt,
-        Range,
-        Staff,
-    }
-
-    public enum WeaponCategory
-    {
-        Melee,
-        Range,
-        Staff,
-    }
-
-    public enum WeaponElementType
-    {
-        None,
-        Fire,
-        Frost,
-        Lightning,
-        Magic,
-        Darkness,
-        Water,
-        Physical,
-    }
-
-    public enum PushForce
-    {
-        None = 1,
-        Light = 2,
-        Medium = 3,
-        Large = 4,
-        VeryLarge = 5,
-        Colossal = 6,
-    }
-
-    [System.Serializable]
-    public class WeaponUpgradeLevel
-    {
-        public int goldCostForUpgrade;
-        public Damage newDamage;
-
-        public SerializedDictionary<UpgradeMaterial, int> upgradeMaterials;
-    }
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using AF.Stats;
+    using UnityEditor;
+    using UnityEngine;
+    using UnityEngine.Localization.Settings;
 
     [CreateAssetMenu(menuName = "Items / Weapon / New Weapon")]
     public class Weapon : Item
     {
-        public WeaponClass weaponClass;
+        public WeaponAnimations weaponAnimations;
+        public WeaponDamage weaponDamage;
 
-
-        [Obsolete("Use weaponDamage instead")] public Damage damage;
-
-        [Header("Level & Upgrades")]
         public bool canBeUpgraded = true;
-        public int level = 1;
-        public WeaponUpgradeLevel[] weaponUpgrades;
-
-        //        [Tooltip("How much block hit this weapon does on an enemy shield. Heavier weapons should do at least 2 or 3 hits.")]
-        //        public int blockHitAmount = 1;
-
-        //        [Header("Block Absorption")]
-        //        [Range(0, 100)] public int blockAbsorption = 75;
-        //        public float blockStaminaCost = 30f;
+        public int level = 0;
+        public List<Gemstone> equippedGemstones = new();
+        public WeaponScaling strengthScaling = WeaponScaling.E;
+        public WeaponScaling dexterityScaling = WeaponScaling.E;
+        public WeaponScaling intelligenceScaling = WeaponScaling.E;
 
         public int strengthRequired = 0;
         public int dexterityRequired = 0;
         public int intelligenceRequired = 0;
         public int positiveReputationRequired = 0;
         public int negativeReputationRequired = 0;
-
-
-        [Header("Stamina")]
         public int lightAttackStaminaCost = 20;
         public int heavyAttackStaminaCost = 35;
-
-        [Header("Weapon Special Options")]
         public int manaCostToUseWeaponSpecialAttack = 0;
-
-        [Header("!! DEPRECATED !!")]
-
-        [Obsolete("Use animationData instead.")]
-        public List<AnimationOverride> animationOverrides;
-        [Obsolete("Use animationData instead.")]
-        [Tooltip("Optional")] public List<AnimationOverride> twoHandOverrides;
-        [Obsolete("Use animationData instead.")]
-        [Tooltip("Optional")] public List<AnimationOverride> blockOverrides;
-
-        [Obsolete("Use animationData instead.")]
-        public int lightAttackCombos = 2;
-        [Obsolete("Use animationData instead.")]
-        public int heavyAttackCombos = 1;
-
-        [Header("Upper Layer Options")]
-        public bool useUpperLayerAnimations = false;
-        public bool allowUpperLayerWhenOneHanding = true;
-        public bool allowUpperLayerWhenTwoHanding = true;
-
-        [Header("Dual Wielding Options")]
-        public bool halveDamage = false;
-
         public float speedPenalty = 0f;
         [Range(0.1f, 2f)] public float oneHandAttackSpeedPenalty = 1f;
         [Range(0.1f, 2f)] public float twoHandAttackSpeedPenalty = 1f;
-
-        [Header("Weapon Bonus")]
-        public int amountOfGoldReceivedPerHit = 0;
-        public bool doubleCoinsUponKillingEnemies = false;
+        [Min(1f)] public float coinMultiplierPerFallenEnemy = 1f;
         public bool doubleDamageDuringNightTime = false;
         public bool doubleDamageDuringDayTime = false;
         public int healthRestoredWithEachHit = 0;
 
-        public float jumpAttackVelocity = -5f;
-
-        [Header("Is Holy?")]
-        public bool isHolyWeapon = false;
-        public bool isHexWeapon = false;
-
         [Header("Range Category")]
         public bool isCrossbow = false;
         public bool isHuntingRifle = false;
-
-        [Header("Block Options")]
         [Range(0, 1f)] public float blockAbsorption = .8f;
 
         [Header("Staff Options")]
@@ -155,7 +59,8 @@ namespace AF
             if (state == PlayModeStateChange.ExitingPlayMode)
             {
                 // Clear the list when exiting play mode
-                level = 1;
+                level = 0;
+                equippedGemstones.Clear();
             }
         }
 #endif
@@ -163,20 +68,25 @@ namespace AF
 
         public bool CanBeUpgradedFurther()
         {
-            return canBeUpgraded && weaponUpgrades != null && weaponUpgrades.Length > 0 && this.level > 0 && this.level <= weaponUpgrades.Length - 1;
+            if (!canBeUpgraded)
+            {
+                return false;
+            }
+
+            return this.level + 1 < weaponDamage.weaponUpgradeLevels.Count();
         }
 
         public string GetMaterialCostForNextLevel()
         {
-            if (CanBeUpgradedFurther() && weaponUpgrades[this.level - 1] != null && weaponUpgrades[this.level - 1].upgradeMaterials != null)
+            if (CanBeUpgradedFurther())
             {
-                WeaponUpgradeLevel nextWeaponUpgradeLevel = weaponUpgrades[this.level - 1];
+                WeaponUpgradeLevel nextWeaponUpgradeLevel = weaponDamage.weaponUpgradeLevels[this.level + 1];
                 string text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Next Weapon Level: ")}{this.level + 1}\n";
 
                 text += $"{LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Required Gold:")} {nextWeaponUpgradeLevel.goldCostForUpgrade} {LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Coins")}\n";
                 text += $"{LocalizationSettings.StringDatabase.GetLocalizedString("UIDocuments", "Required Items:")} \n";
 
-                foreach (var upgradeMat in weaponUpgrades[this.level - 1].upgradeMaterials)
+                foreach (var upgradeMat in weaponDamage.weaponUpgradeLevels[this.level + 1].upgradeMaterials)
                 {
                     if (upgradeMat.Key != null)
                     {
@@ -257,24 +167,8 @@ namespace AF
             return text.TrimEnd();
         }
 
-        public bool CanUseUpperLayer(EquipmentDatabase equipmentDatabase)
-        {
-            if (!useUpperLayerAnimations)
-            {
-                return false;
-            }
-
-            if (!allowUpperLayerWhenOneHanding && !equipmentDatabase.isTwoHanding)
-            {
-                return false;
-            }
-            if (!allowUpperLayerWhenTwoHanding && equipmentDatabase.isTwoHanding)
-            {
-                return false;
-            }
-
-            return true;
-        }
+        public bool IsHolyWeapon() => weaponDamage.HasHolyDamage(this.level);
+        public bool IsHexWeapon() => weaponDamage.HasHexDamage(this.level);
     }
 
 }

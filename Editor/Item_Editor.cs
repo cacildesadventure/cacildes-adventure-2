@@ -5,18 +5,18 @@ namespace AF
     using UnityEngine.Localization.Tables;
     using UnityEngine.UIElements;
 
-    [CustomEditor(typeof(Weapon))]
-    public class WeaponEditor : Editor
+    [CustomEditor(typeof(Item))]
+    public class ItemEditor : Editor
     {
         public VisualTreeAsset VisualTree;
         public StringTable englishTable;
         public StringTable portugueseTable;
 
-        Weapon weapon;
+        Item item;
 
         private void OnEnable()
         {
-            weapon = (Weapon)target;
+            item = (Item)target;
         }
 
         public override VisualElement CreateInspectorGUI()
@@ -34,35 +34,35 @@ namespace AF
         {
             root.Q<PropertyField>("WeaponNameEN").RegisterCallback<FocusOutEvent>(ev =>
             {
-                var existingEntry = englishTable.GetEntry(weapon.name);
+                var existingEntry = englishTable.GetEntry(item.name);
                 if (existingEntry == null)
-                    englishTable.AddEntry(weapon.name, weapon.englishName);
+                    englishTable.AddEntry(item.name, item.englishName);
                 else
-                    existingEntry.Value = weapon.englishName;
+                    existingEntry.Value = item.englishName;
 
                 SaveAll();
             });
 
             root.Q<PropertyField>("WeaponNamePT").RegisterCallback<FocusOutEvent>(ev =>
             {
-                var existingEntry = portugueseTable.GetEntry(weapon.name);
+                var existingEntry = portugueseTable.GetEntry(item.name);
                 if (existingEntry == null)
-                    portugueseTable.AddEntry(weapon.name, weapon.portugueseName);
+                    portugueseTable.AddEntry(item.name, item.portugueseName);
                 else
-                    existingEntry.Value = weapon.portugueseName;
+                    existingEntry.Value = item.portugueseName;
 
                 SaveAll();
             });
 
-            string descriptionKey = weapon.name + "_Description";
+            string descriptionKey = item.name + "_Description";
 
             root.Q<PropertyField>("WeaponDescriptionEN").RegisterCallback<FocusOutEvent>(ev =>
             {
                 var existingEntry = englishTable.GetEntry(descriptionKey);
                 if (existingEntry == null)
-                    englishTable.AddEntry(descriptionKey, weapon.englishDescription);
+                    englishTable.AddEntry(descriptionKey, item.englishDescription);
                 else
-                    existingEntry.Value = weapon.englishDescription;
+                    existingEntry.Value = item.englishDescription;
 
                 SaveAll();
             });
@@ -71,9 +71,9 @@ namespace AF
             {
                 var existingEntry = portugueseTable.GetEntry(descriptionKey);
                 if (existingEntry == null)
-                    portugueseTable.AddEntry(descriptionKey, weapon.portugueseDescription);
+                    portugueseTable.AddEntry(descriptionKey, item.portugueseDescription);
                 else
-                    existingEntry.Value = weapon.portugueseDescription;
+                    existingEntry.Value = item.portugueseDescription;
 
                 SaveAll();
             });
@@ -81,7 +81,7 @@ namespace AF
             root.Q<PropertyField>("WeaponSpriteField").RegisterValueChangeCallback(ev =>
                 {
                     root.Q<IMGUIContainer>("WeaponSprite").style.backgroundImage =
-                        new StyleBackground(weapon.sprite ?? null);
+                        new StyleBackground(item.sprite ?? null);
                 });
 
             root.Q<ToolbarButton>("General").RegisterCallback<ClickEvent>((ev) =>
@@ -90,28 +90,11 @@ namespace AF
 
                 root.Q<VisualElement>("GeneralInfo").style.display = DisplayStyle.Flex;
             });
-            root.Q<ToolbarButton>("Requirements").RegisterCallback<ClickEvent>((ev) =>
-            {
-                HideToolbarPanels(root);
-
-                root.Q<VisualElement>("RequirementsInfo").style.display = DisplayStyle.Flex;
-            });
             root.Q<ToolbarButton>("Speed").RegisterCallback<ClickEvent>((ev) =>
             {
                 HideToolbarPanels(root);
 
                 root.Q<VisualElement>("SpeedInfo").style.display = DisplayStyle.Flex;
-            });
-            root.Q<ToolbarButton>("Costs").RegisterCallback<ClickEvent>((ev) =>
-            {
-                HideToolbarPanels(root);
-                root.Q<VisualElement>("CostsInfo").style.display = DisplayStyle.Flex;
-            });
-
-            root.Q<ToolbarButton>("Bonus").RegisterCallback<ClickEvent>((ev) =>
-            {
-                HideToolbarPanels(root);
-                root.Q<VisualElement>("BonusInfo").style.display = DisplayStyle.Flex;
             });
 
             HideToolbarPanels(root);
@@ -120,11 +103,9 @@ namespace AF
 
         void HideToolbarPanels(VisualElement root)
         {
+
             root.Q<VisualElement>("GeneralInfo").style.display = DisplayStyle.None;
-            root.Q<VisualElement>("RequirementsInfo").style.display = DisplayStyle.None;
             root.Q<VisualElement>("SpeedInfo").style.display = DisplayStyle.None;
-            root.Q<VisualElement>("CostsInfo").style.display = DisplayStyle.None;
-            root.Q<VisualElement>("BonusInfo").style.display = DisplayStyle.None;
         }
 
         public void SaveAll()
@@ -133,11 +114,11 @@ namespace AF
                 portugueseTable.GetEntry(name);
             if (portugueseExistingEntry == null)
             {
-                portugueseTable.AddEntry(name, weapon.name);
+                portugueseTable.AddEntry(name, item.name);
             }
             else
             {
-                portugueseExistingEntry.Value = weapon.name;
+                portugueseExistingEntry.Value = item.name;
             }
 
             EditorUtility.SetDirty(englishTable);

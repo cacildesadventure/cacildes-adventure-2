@@ -57,19 +57,19 @@ namespace AF
 
             Weapon weaponToEquip = item as Weapon;
 
-            int basePhysicalAttack = currentWeapon.weaponClass.GetCurrentDamage(
+            int basePhysicalAttack = currentWeapon.weaponDamage.GetCurrentDamage(
                 playerManager,
                 playerManager.statsBonusController.GetCurrentStrength(),
                 playerManager.statsBonusController.GetCurrentDexterity(),
                 playerManager.statsBonusController.GetCurrentIntelligence(),
-                currentWeapon.level).physical;
+                currentWeapon).physical;
 
-            int itemPhysicalAttack = weaponToEquip != null ? weaponToEquip.weaponClass.GetCurrentDamage(
+            int itemPhysicalAttack = weaponToEquip != null ? weaponToEquip.weaponDamage.GetCurrentDamage(
                 playerManager,
                 playerManager.statsBonusController.GetCurrentStrength(),
                 playerManager.statsBonusController.GetCurrentDexterity(),
                 playerManager.statsBonusController.GetCurrentIntelligence(),
-                weaponToEquip.level).physical : 0;
+                weaponToEquip).physical : 0;
 
             // Physical and Elemental Defenses
             int basePhysicalDefense = (int)defenseStatManager.GetDefenseAbsorption();

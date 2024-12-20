@@ -67,7 +67,7 @@ namespace AF
                 }
                 else
                 {
-                    Label label = new Label();
+                    Label label = new();
                     label.style.unityTextAlign = TextAnchor.MiddleCenter;
                     label.style.fontSize = 20;
                     label.style.color = isComplete ? tutorialManager.goldColor : Color.white;

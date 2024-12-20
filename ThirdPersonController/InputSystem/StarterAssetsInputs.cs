@@ -75,6 +75,7 @@ namespace AF
 		public PlayerCamera playerCamera;
 
 		[Header("Tutorial Events")]
+		public UIDocumentTutorial uIDocumentTutorial;
 		public TutorialEventMessage jumpEventMessage;
 
 		private void Awake()
@@ -108,7 +109,7 @@ namespace AF
 		{
 			jump = value.isPressed;
 
-			EventManager.EmitEvent(jumpEventMessage.name);
+			uIDocumentTutorial?.OnStepComplete(jumpEventMessage);
 		}
 
 		public void OnSprint(InputValue value)
@@ -342,6 +343,11 @@ namespace AF
 
 		public string GetCurrentKeyBindingForAction(string actionName)
 		{
+			if (playerInput == null)
+			{
+				playerInput = GetComponent<PlayerInput>();
+			}
+
 			InputAction inputAction = playerInput
 				.actions
 				.FindAction(actionName);

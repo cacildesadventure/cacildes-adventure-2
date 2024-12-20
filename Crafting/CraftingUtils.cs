@@ -1,13 +1,35 @@
-using System.Collections.Generic;
-using System.Linq;
-using AF.Inventory;
-using UnityEngine.Events;
-using UnityEngine.Localization.Settings;
-
 namespace AF
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using AF.Inventory;
+    using UnityEngine.Events;
+    using UnityEngine.Localization.Settings;
+
     public static class CraftingUtils
     {
+        public static bool IsFullyUpgraded(Weapon weapon) => weapon.level >= weapon.weaponDamage.weaponUpgradeLevels.Length - 1;
+
+        public static bool ShouldSkipUpgrade(Weapon wp)
+        {
+            if (wp == null)
+            {
+                return true;
+            }
+
+            if (!wp.canBeUpgraded)
+            {
+                return true;
+            }
+
+            if (IsFullyUpgraded(wp))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool CanCraftItem(InventoryDatabase inventoryDatabase, CraftingRecipe recipe)
         {
             bool hasEnoughMaterial = true;
@@ -40,7 +62,12 @@ namespace AF
 
         public static bool CanImproveWeapon(InventoryDatabase inventoryDatabase, Weapon weapon, int ownedGold)
         {
-            WeaponUpgradeLevel nextWeaponUpgradeLevel = weapon.weaponUpgrades.ElementAtOrDefault(weapon.level - 1);
+            if (ShouldSkipUpgrade(weapon))
+            {
+                return false;
+            }
+
+            WeaponUpgradeLevel nextWeaponUpgradeLevel = weapon.weaponDamage.GetWeaponUpgradeLevel(weapon.level);
 
             if (nextWeaponUpgradeLevel == null)
             {
@@ -79,7 +106,7 @@ namespace AF
         {
             var currentWeaponLevel = weapon.level;
 
-            WeaponUpgradeLevel weaponUpgradeForNextLevel = weapon.weaponUpgrades.ElementAtOrDefault(currentWeaponLevel - 1);
+            WeaponUpgradeLevel weaponUpgradeForNextLevel = weapon.weaponDamage.GetWeaponUpgradeLevel(currentWeaponLevel);
 
             onUpgrade(weaponUpgradeForNextLevel.goldCostForUpgrade);
 

@@ -1,82 +1,67 @@
-
 namespace AF
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using AF.Animations;
     using AF.Health;
     using UnityEngine;
     using UnityEngine.Localization.Settings;
 
-    [CreateAssetMenu(menuName = "Items / Weapon / New Weapon Class")]
-    public class WeaponClass : ScriptableObject
+    [CreateAssetMenu(menuName = "Items / Weapon / New Weapon Damage")]
+    public class WeaponDamage : ScriptableObject
     {
-
-        [Header("One Handing")]
-        public List<AnimationOverride> baseAnimationOverrides;
-        [Header("Two Handing")]
-        public List<AnimationOverride> twoHandOverrides;
-        [Header("Block")]
-        public List<AnimationOverride> blockOverrides;
-        [Header("Secondary Weapon")]
-        public List<AnimationOverride> secondaryWeaponOverrides;
-
-        [Header("Combo Count")]
-        public int lightAttackCombos = 2;
-        public int heavyAttackCombos = 1;
-
-        [Header("Damage")]
-        public Damage damage;
-
-        [Header("Scaling")]
-        public WeaponScaling strengthScaling = WeaponScaling.E;
-        public WeaponScaling dexterityScaling = WeaponScaling.E;
-        public WeaponScaling intelligenceScaling = WeaponScaling.E;
-
         [Header("Upgrades")]
-        public float[] upgradeLevelBonus;
+        public WeaponUpgradeLevel[] weaponUpgradeLevels;
 
-        public bool IsRangeWeapon() => damage.weaponAttackType == WeaponAttackType.Range;
-        public bool IsMagicStave() => damage.weaponAttackType == WeaponAttackType.Staff;
+        public bool IsRangeWeapon(int weaponLevel) => GetCurrentDamage(weaponLevel).weaponAttackType == WeaponAttackType.Range;
+        public bool IsMagicStave(int weaponLevel) => GetCurrentDamage(weaponLevel).weaponAttackType == WeaponAttackType.Staff;
 
-        float GetUpgradeLevel(int weaponLevel)
+        public WeaponUpgradeLevel GetWeaponUpgradeLevel(int level)
         {
-            if (upgradeLevelBonus.Length <= 0)
+            if (weaponUpgradeLevels == null || weaponUpgradeLevels.Length <= 0)
             {
-                return 1;
+                throw new Exception($"No weapon level assigned to weapon damage {this.name}");
             }
 
-            return upgradeLevelBonus[weaponLevel];
+            return weaponUpgradeLevels[level];
+        }
+
+        Damage GetCurrentDamage(int weaponLevel)
+        {
+            return GetWeaponUpgradeLevel(weaponLevel)?.damage;
         }
 
         public Damage GetCurrentDamage(
             PlayerManager playerManager,
             // Must be passed as parameters because we might be previewing raised stats from the level up screen
-            int playerStrength, int playerDexterity, int playerIntelligence,
-            int weaponLevel)
+            int playerStrength,
+            int playerDexterity,
+            int playerIntelligence,
+            Weapon currentWeapon)
         {
+            Damage currentDamage = GetCurrentDamage(currentWeapon.level);
+
             return new(
-                   physical: GetWeaponAttack(WeaponElementType.Physical, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   fire: GetWeaponAttack(WeaponElementType.Fire, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   frost: GetWeaponAttack(WeaponElementType.Frost, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   magic: GetWeaponAttack(WeaponElementType.Magic, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   lightning: GetWeaponAttack(WeaponElementType.Lightning, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   darkness: GetWeaponAttack(WeaponElementType.Darkness, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   water: GetWeaponAttack(WeaponElementType.Water, playerManager, playerStrength, playerDexterity, playerIntelligence, weaponLevel),
-                   postureDamage: GetWeaponPostureDamage(playerManager, weaponLevel),
-                   poiseDamage: GetWeaponPoiseDamage(playerManager, weaponLevel),
-                   weaponAttackType: damage.weaponAttackType,
-                   statusEffects: GetWeaponStatusEffectsDamage(playerManager, weaponLevel),
-                   pushForce: GetWeaponPushForceDamage(playerManager, weaponLevel),
-                   canNotBeParried: damage.canNotBeParried,
-                   ignoreBlocking: damage.ignoreBlocking
+                   physical: GetWeaponAttack(WeaponElementType.Physical, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   fire: GetWeaponAttack(WeaponElementType.Fire, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   frost: GetWeaponAttack(WeaponElementType.Frost, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   magic: GetWeaponAttack(WeaponElementType.Magic, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   lightning: GetWeaponAttack(WeaponElementType.Lightning, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   darkness: GetWeaponAttack(WeaponElementType.Darkness, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   water: GetWeaponAttack(WeaponElementType.Water, playerManager, playerStrength, playerDexterity, playerIntelligence, currentWeapon),
+                   postureDamage: GetWeaponPostureDamage(playerManager, currentWeapon.level),
+                   poiseDamage: GetWeaponPoiseDamage(playerManager, currentWeapon.level),
+                   weaponAttackType: currentDamage.weaponAttackType,
+                   statusEffects: GetWeaponStatusEffectsDamage(playerManager, currentWeapon),
+                   pushForce: GetWeaponPushForceDamage(playerManager, currentWeapon.level),
+                   canNotBeParried: currentDamage.canNotBeParried,
+                   ignoreBlocking: currentDamage.ignoreBlocking
                );
         }
 
         int GetWeaponPostureDamage(PlayerManager playerManager, int weaponLevel)
         {
-            int currentPostureDamage = (int)(damage.postureDamage * GetUpgradeLevel(weaponLevel));
+            int currentPostureDamage = GetCurrentDamage(weaponLevel).postureDamage;
 
             if (playerManager.playerCombatController.isHeavyAttacking)
             {
@@ -93,7 +78,7 @@ namespace AF
 
         int GetWeaponPoiseDamage(PlayerManager playerManager, int weaponLevel)
         {
-            int currentPoiseDamage = (int)(damage.poiseDamage * GetUpgradeLevel(weaponLevel));
+            int currentPoiseDamage = GetCurrentDamage(weaponLevel).poiseDamage;
 
             if (playerManager.playerCombatController.isHeavyAttacking)
             {
@@ -108,30 +93,36 @@ namespace AF
             return currentPoiseDamage;
         }
 
-        int GetWeaponPushForceDamage(PlayerManager playerManager, int weaponLevel)
+        float GetWeaponPushForceDamage(PlayerManager playerManager, int weaponLevel)
         {
-            int currentPushForceDamage = (int)(damage.pushForce * GetUpgradeLevel(weaponLevel));
+            float currentPushForceDamage = GetCurrentDamage(weaponLevel).pushForce;
 
             if (playerManager.playerCombatController.isHeavyAttacking)
             {
-                return (int)(currentPushForceDamage * CombatSettings.heavyAttackMultiplier);
+                return currentPushForceDamage * CombatSettings.heavyAttackMultiplier;
             }
 
             if (playerManager.playerCombatController.isJumpAttacking)
             {
-                return (int)(currentPushForceDamage * CombatSettings.jumpAttackMultiplier);
+                return currentPushForceDamage * CombatSettings.jumpAttackMultiplier;
             }
 
             return currentPushForceDamage;
         }
 
-        StatusEffectEntry[] GetWeaponStatusEffectsDamage(PlayerManager playerManager, int weaponLevel)
+        StatusEffectEntry[] GetWeaponStatusEffectsDamage(PlayerManager playerManager, Weapon currentWeapon)
         {
             List<StatusEffectEntry> effects = new();
 
-            foreach (StatusEffectEntry status in damage.statusEffects)
+            Damage currentDamage = GetCurrentDamage(currentWeapon.level);
+            if (currentDamage == null)
             {
-                int newAmountPerHit = (int)(status.amountPerHit * GetUpgradeLevel(weaponLevel));
+                return new List<StatusEffectEntry>().ToArray();
+            }
+
+            foreach (StatusEffectEntry status in currentDamage.statusEffects)
+            {
+                int newAmountPerHit = (int)status.amountPerHit;
 
                 if (playerManager.playerCombatController.isHeavyAttacking)
                 {
@@ -149,46 +140,47 @@ namespace AF
             return effects.ToArray();
         }
 
-        public int GetStrengthScalingBonus(int playerStrength)
-            => (int)WeaponScalingTable.GetScalingBonus(AttributeType.STRENGTH, strengthScaling, playerStrength);
+        public int GetStrengthScalingBonus(int playerStrength, Weapon currentWeapon)
+            => (int)WeaponScalingTable.GetScalingBonus(AttributeType.STRENGTH, currentWeapon.strengthScaling, playerStrength);
 
-        public int GetDexterityScalingBonus(int playerDexterity)
-            => (int)WeaponScalingTable.GetScalingBonus(AttributeType.DEXTERITY, dexterityScaling, playerDexterity);
+        public int GetDexterityScalingBonus(int playerDexterity, Weapon currentWeapon)
+            => (int)WeaponScalingTable.GetScalingBonus(AttributeType.DEXTERITY, currentWeapon.dexterityScaling, playerDexterity);
 
-        public int GetIntelligenceScalingBonus(int playerIntelligence)
-            => (int)WeaponScalingTable.GetScalingBonus(AttributeType.INTELLIGENCE, intelligenceScaling, playerIntelligence);
+        public int GetIntelligenceScalingBonus(int playerIntelligence, Weapon currentWeapon)
+            => (int)WeaponScalingTable.GetScalingBonus(AttributeType.INTELLIGENCE, currentWeapon.intelligenceScaling, playerIntelligence);
 
-        int GetScalingBonus(int playerStrength, int playerDexterity, int playerIntelligence)
-            => GetStrengthScalingBonus(playerStrength) + GetDexterityScalingBonus(playerDexterity) + GetIntelligenceScalingBonus(playerIntelligence);
+        int GetScalingBonus(int playerStrength, int playerDexterity, int playerIntelligence, Weapon currentWeapon)
+            => GetStrengthScalingBonus(playerStrength, currentWeapon) + GetDexterityScalingBonus(playerDexterity, currentWeapon) + GetIntelligenceScalingBonus(playerIntelligence, currentWeapon);
 
         public int GetWeaponAttack(
             WeaponElementType element, PlayerManager playerManager,
-            int playerStrength, int playerDexterity, int playerIntelligence, int weaponLevel)
+            int playerStrength, int playerDexterity, int playerIntelligence, Weapon currentWeapon)
         {
             int elementAttack = 0;
-            if (element == WeaponElementType.Physical) elementAttack = damage.physical;
-            if (element == WeaponElementType.Fire) elementAttack = damage.fire;
-            if (element == WeaponElementType.Frost) elementAttack = damage.frost;
-            if (element == WeaponElementType.Magic) elementAttack = damage.magic;
-            if (element == WeaponElementType.Lightning) elementAttack = damage.lightning;
-            if (element == WeaponElementType.Darkness) elementAttack = damage.darkness;
-            if (element == WeaponElementType.Water) elementAttack = damage.water;
 
-            int currentAttack = (int)(elementAttack * GetUpgradeLevel(weaponLevel));
+            Damage currentDamage = GetCurrentDamage(currentWeapon.level);
+
+            if (element == WeaponElementType.Physical) elementAttack = currentDamage.physical;
+            if (element == WeaponElementType.Fire) elementAttack = currentDamage.fire;
+            if (element == WeaponElementType.Frost) elementAttack = currentDamage.frost;
+            if (element == WeaponElementType.Magic) elementAttack = currentDamage.magic;
+            if (element == WeaponElementType.Lightning) elementAttack = currentDamage.lightning;
+            if (element == WeaponElementType.Darkness) elementAttack = currentDamage.darkness;
+            if (element == WeaponElementType.Water) elementAttack = currentDamage.water;
 
             return (int)(
-                (currentAttack
-                    + GetScalingBonus(playerStrength, playerDexterity, playerIntelligence)
-                    + GetFaithBonuses(playerManager)
+                (elementAttack
+                    + GetScalingBonus(playerStrength, playerDexterity, playerIntelligence, currentWeapon)
+                    + GetFaithBonuses(playerManager, currentDamage)
                     + GetAttackBonuses(playerManager)
                 ) * GetAttackMultipliers(playerManager));
         }
 
-        int GetFaithBonuses(PlayerManager playerManager)
+        int GetFaithBonuses(PlayerManager playerManager, Damage currentDamage)
         {
             int currentReputation = playerManager.statsBonusController.GetCurrentReputation();
 
-            if (damage.lightning > 0 || damage.darkness > 0)
+            if (currentDamage.lightning > 0 || currentDamage.darkness > 0)
             {
                 return (int)Math.Min(100, Mathf.Pow(Mathf.Abs(currentReputation), 1.25f)); ;
             }
@@ -196,11 +188,11 @@ namespace AF
             return 0;
         }
 
-        public string GetFormattedStatusDamages(PlayerManager playerManager, int weaponLevel)
+        public string GetFormattedStatusDamages(PlayerManager playerManager, Weapon currentWeapon)
         {
             string result = "";
 
-            foreach (var statusEffect in GetWeaponStatusEffectsDamage(playerManager, weaponLevel))
+            foreach (var statusEffect in GetWeaponStatusEffectsDamage(playerManager, currentWeapon))
             {
                 if (statusEffect != null)
                 {
@@ -254,7 +246,7 @@ namespace AF
 
 
         private float GetWeaponTypeBonus(Weapon weapon, PlayerManager playerManager) =>
-            weapon.weaponClass.damage.weaponAttackType switch
+            weapon.weaponDamage.GetCurrentDamage(weapon.level).weaponAttackType switch
             {
                 WeaponAttackType.Pierce => playerManager.statsBonusController.pierceDamageMultiplier,
                 WeaponAttackType.Slash => playerManager.statsBonusController.slashDamageMultiplier,
@@ -299,5 +291,7 @@ namespace AF
             return attackMultiplier;
         }
 
+        public bool HasHolyDamage(int weaponLevel) => GetCurrentDamage(weaponLevel).lightning != 0;
+        public bool HasHexDamage(int weaponLevel) => GetCurrentDamage(weaponLevel).darkness != 0;
     }
 }

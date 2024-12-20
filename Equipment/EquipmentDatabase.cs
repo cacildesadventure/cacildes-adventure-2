@@ -325,9 +325,27 @@ namespace AF
 
         public bool IsAccessoryEquiped(Accessory accessory) => accessories.Contains(accessory);
 
-        public bool IsBowEquipped() => GetCurrentWeapon()?.weaponClass?.IsRangeWeapon() == true;
+        public bool IsBowEquipped()
+        {
+            Weapon currentWeapon = GetCurrentWeapon();
+            if (currentWeapon == null)
+            {
+                return false;
+            }
 
-        public bool IsStaffEquipped() => GetCurrentWeapon()?.weaponClass?.IsMagicStave() == true;
+            return currentWeapon.weaponDamage.GetWeaponUpgradeLevel(currentWeapon.level).damage.weaponAttackType == WeaponAttackType.Range;
+        }
+
+        public bool IsStaffEquipped()
+        {
+            Weapon currentWeapon = GetCurrentWeapon();
+            if (currentWeapon == null)
+            {
+                return false;
+            }
+
+            return currentWeapon.weaponDamage.GetWeaponUpgradeLevel(currentWeapon.level).damage.weaponAttackType == WeaponAttackType.Staff;
+        }
         public bool IsUnarmed() => GetCurrentWeapon() == null;
         public bool IsPowerStancing()
         {
@@ -336,7 +354,7 @@ namespace AF
                 return false;
             }
 
-            return GetCurrentSecondaryWeapon().weaponClass == GetCurrentWeapon().weaponClass;
+            return GetCurrentSecondaryWeapon().weaponDamage == GetCurrentWeapon().weaponDamage;
         }
 
         public bool HasEnoughCurrentArrows()

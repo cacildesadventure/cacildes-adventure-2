@@ -33,13 +33,6 @@ namespace AF
                 ShowGUI();
             });
 
-            foreach (var tutorialEventMessage in Resources.LoadAll<TutorialEventMessage>("Tutorial Event Messages"))
-            {
-                EventManager.StartListening(tutorialEventMessage.name, () =>
-                {
-                    OnStepComplete(tutorialEventMessage);
-                });
-            }
         }
 
         void ShowGUI()
@@ -83,11 +76,6 @@ namespace AF
         public void OnStepComplete(TutorialEventMessage stepCompleteMessage)
         {
             if (stepCompleteMessage == null)
-            {
-                return;
-            }
-
-            if (tutorialManager.currentTutorial == null)
             {
                 return;
             }

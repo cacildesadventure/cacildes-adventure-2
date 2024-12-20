@@ -86,13 +86,13 @@ namespace AF
                 return 0;
             }
 
-            return weapon.weaponClass.GetWeaponAttack(
+            return weapon.weaponDamage.GetWeaponAttack(
                     elementType,
                     attackStatManager.playerManager,
                     attackStatManager.playerManager.statsBonusController.GetCurrentStrength(),
                     attackStatManager.playerManager.statsBonusController.GetCurrentDexterity(),
                     attackStatManager.playerManager.statsBonusController.GetCurrentIntelligence(),
-                    weapon.level);
+                    weapon);
         }
 
         public static int GetElementalDefenseFromItem(ArmorBase armorBase, WeaponElementType weaponElementType, DefenseStatManager defenseStatManager, EquipmentDatabase equipmentDatabase)

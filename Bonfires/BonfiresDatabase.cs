@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
-
 namespace AF.Bonfires
 {
+    using System.Collections.Generic;
+    using UnityEditor;
+    using UnityEngine;
 
     [CreateAssetMenu(fileName = "Bonfires Database", menuName = "System/New Bonfires Database", order = 0)]
     public class BonfiresDatabase : ScriptableObject
@@ -33,7 +32,5 @@ namespace AF.Bonfires
             unlockedBonfires.Clear();
             lastBonfireSceneId = "";
         }
-
     }
-
 }

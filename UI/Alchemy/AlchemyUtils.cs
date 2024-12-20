@@ -32,7 +32,7 @@ namespace AF
                 itemThumbnailName = generatedThumbnail?.name,
                 positiveEffects = positiveEffects,
                 negativeEffects = negativeEffects,
-                value = value
+                value = value,
             };
         }
 

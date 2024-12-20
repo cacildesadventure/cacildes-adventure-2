@@ -38,7 +38,7 @@ namespace AF
         {
             Weapon playerWeapon = equipmentDatabase.GetCurrentWeapon();
 
-            if (playerWeapon != null && playerWeapon.isHolyWeapon)
+            if (playerWeapon != null && playerWeapon.IsHolyWeapon())
             {
                 this.gameObject.SetActive(false);
                 return;

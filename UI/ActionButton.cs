@@ -96,7 +96,7 @@ namespace AF.UI
             background.style.height = 24;
             background.style.unityBackgroundImageTintColor = keyboardBackgroundColor;
 
-            string rebindedKey = starterAssetsInputs?.GetCurrentKeyBindingForAction(actionName);
+            string rebindedKey = starterAssetsInputs != null ? starterAssetsInputs.GetCurrentKeyBindingForAction(actionName) : "";
             Label keyLabel = new Label(rebindedKey);
             keyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             keyLabel.style.fontSize = 20;

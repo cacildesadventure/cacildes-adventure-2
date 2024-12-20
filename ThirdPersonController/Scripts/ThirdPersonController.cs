@@ -78,7 +78,10 @@ namespace AF
         public bool LockCameraPosition = false;
         public bool rotateWithCamera = false;
 
-        public float jumpAttackVelocity = -5f;
+
+
+        const float jumpAttackVelocity = -5f;
+
 
         // cinemachine
         public float _cinemachineTargetYaw = 0f;
@@ -796,13 +799,7 @@ namespace AF
                 // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
                 if (_verticalVelocity < _terminalVelocity)
                 {
-                    var jumpAttackVelocityFinal = jumpAttackVelocity;
-                    if (equipmentDatabase.GetCurrentWeapon() != null)
-                    {
-                        jumpAttackVelocityFinal = equipmentDatabase.GetCurrentWeapon().jumpAttackVelocity;
-                    }
-
-                    _verticalVelocity += (Gravity * Time.deltaTime) + (playerManager.playerCombatController.isJumpAttacking ? jumpAttackVelocityFinal : 0f);
+                    _verticalVelocity += (Gravity * Time.deltaTime) + (playerManager.playerCombatController.isJumpAttacking ? jumpAttackVelocity : 0f);
                 }
             }
             /*else if ((equipmentDatabase.GetCurrentWeapon() == null) || (equipmentDatabase.GetCurrentWeapon() != null && equipmentDatabase.GetCurrentWeapon().stopInAir == true))
