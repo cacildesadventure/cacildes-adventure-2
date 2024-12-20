@@ -16,7 +16,6 @@ namespace AF.Inventory
         public SerializedDictionary<Item, ItemAmount> ownedItems = new();
 
         public SerializedDictionary<Item, ItemAmount> defaultItems = new();
-        public SerializedDictionary<string, List<UserCreatedItem>> userCreatedItems = new();
 
         [Header("Databases")]
         public EquipmentDatabase equipmentDatabase;
@@ -77,15 +76,6 @@ namespace AF.Inventory
 
         public void AddUserCreatedItem(UserCreatedItem userCreatedItem)
         {
-            if (userCreatedItems.ContainsKey(userCreatedItem.itemName))
-            {
-                userCreatedItems[userCreatedItem.itemName].Add(userCreatedItem);
-            }
-            else
-            {
-                userCreatedItems.Add(userCreatedItem.itemName, new() { userCreatedItem });
-            }
-
             // Look up to a entry in owned items with the same user created item name
             Item matchedEntry = ownedItems.FirstOrDefault(ownedItem => ownedItem.Key.name == userCreatedItem.itemName).Key;
 
@@ -95,40 +85,7 @@ namespace AF.Inventory
                 return;
             }
 
-            Consumable consumable = CreateInstance<Consumable>();
-            consumable.value = userCreatedItem.value;
-            consumable.sprite = userCreatedItem.itemThumbnail;
-            consumable.name = userCreatedItem.itemName;
-            consumable.isUserCreatedItem = true;
-
-            var statusEffectsWhenConsumed = new List<StatusEffect>();
-            statusEffectsWhenConsumed.AddRange(userCreatedItem.positiveEffects);
-            statusEffectsWhenConsumed.AddRange(userCreatedItem.negativeEffects);
-            consumable.statusEffectsWhenConsumed = statusEffectsWhenConsumed.ToArray();
-
-            AddItem(consumable, 1);
-        }
-
-        public void RemoveUserCreatedItem(Item item)
-        {
-            if (!userCreatedItems.ContainsKey(item.name))
-            {
-                return;
-            }
-
-            if (userCreatedItems[item.name].Count <= 1)
-            {
-                userCreatedItems.Remove(item.name);
-            }
-            else
-            {
-                userCreatedItems[item.name].RemoveRange(0, 1);
-            }
-        }
-
-        public bool IsUserCreatedItem(Item item)
-        {
-            return userCreatedItems.ContainsKey(item.name);
+            AddItem(userCreatedItem.GenerateItem(), 1);
         }
 
         public void AddItem(Item itemToAdd)

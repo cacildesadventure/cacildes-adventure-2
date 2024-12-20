@@ -1,5 +1,7 @@
 ﻿namespace AF
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     [CreateAssetMenu(menuName = "Items / Item / New Consumable")]
@@ -15,6 +17,10 @@
         public StatusEffect[] statusEffectsWhenConsumed;
         public float effectsDurationInSeconds = 6;
 
+        [Header("User Created Item Options")]
+        public bool isUserCreatedItem = false;
+        public string createdItemThumbnailName;
+
         public string GetFormattedAppliedStatusEffects()
         {
             string result = "";
@@ -28,6 +34,17 @@
             }
 
             return result.TrimEnd();
+        }
+
+        public SerializedUserCreatedItem ConvertToSerializedUserCreatedItem()
+        {
+            return new SerializedUserCreatedItem
+            {
+                itemName = GetName(),
+                itemThumbnailName = createdItemThumbnailName,
+                effects = statusEffectsWhenConsumed.Select(element => element.name).ToArray(),
+                value = (int)value,
+            };
         }
     }
 }

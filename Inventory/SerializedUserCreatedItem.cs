@@ -1,6 +1,7 @@
 namespace AF
 {
     using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     [System.Serializable]
@@ -8,44 +9,37 @@ namespace AF
     {
         public string itemName;
         public string itemThumbnailName = "";
-        public string[] positiveEffectNames;
-        public string[] negativeEffectNames;
+        public string[] effects;
         public int value = 0;
 
-        public UserCreatedItem GenerateItem()
+        public Consumable GenerateConsumable()
         {
-            List<StatusEffect> positiveEffects = new();
-            foreach (var positiveEffectName in positiveEffectNames)
-            {
-                StatusEffect positiveStatusEffect = Resources.Load<StatusEffect>("Status/Consumables/" + positiveEffectName);
-                if (positiveStatusEffect != null)
-                {
-                    positiveEffects.Add(positiveStatusEffect);
-                }
-            }
 
-            List<StatusEffect> negativeEffects = new();
-            foreach (var negativeEffectName in negativeEffectNames)
+            StatusEffect[] allStatusEffects = Resources.LoadAll<StatusEffect>("Status");
+
+            List<StatusEffect> effectsToAdd = new();
+
+            foreach (var effect in effects)
             {
-                StatusEffect negativeStatusEffect = Resources.Load<StatusEffect>("Status/Negative Status/" + negativeEffectName);
-                if (negativeStatusEffect != null)
+                StatusEffect statusEffectInstance = allStatusEffects.FirstOrDefault(x => x.name == effect);
+
+                if (statusEffectInstance != null)
                 {
-                    negativeEffects.Add(negativeStatusEffect);
+                    effectsToAdd.Add(statusEffectInstance);
                 }
             }
 
             CreatedItemThumbnail createdItemThumbnail = Resources.Load<CreatedItemThumbnail>("Created Item Thumbnails/" + itemThumbnailName);
 
-            return new UserCreatedItem
+            return new()
             {
-                itemName = itemName,
-                itemThumbnail = createdItemThumbnail?.thumbnail,
-                itemThumbnailName = createdItemThumbnail?.name,
-                positiveEffects = positiveEffects.ToArray(),
-                negativeEffects = negativeEffects.ToArray(),
+                name = itemName,
+                createdItemThumbnailName = createdItemThumbnail?.name,
+                sprite = createdItemThumbnail?.thumbnail,
+                statusEffectsWhenConsumed = effectsToAdd.ToArray(),
                 value = value,
+                isUserCreatedItem = true
             };
         }
-
     }
 }

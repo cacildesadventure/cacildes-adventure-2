@@ -118,11 +118,6 @@ namespace AF
         {
             inventoryDatabase.RemoveItem(item, quantity);
 
-            if (inventoryDatabase.IsUserCreatedItem(item))
-            {
-                inventoryDatabase.RemoveUserCreatedItem(item);
-            }
-
             uIDocumentPlayerHUDV2.equipmentHUD.UpdateUI();
         }
 

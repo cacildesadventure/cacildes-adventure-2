@@ -27,7 +27,6 @@ namespace AF
         [Tooltip("If we want to buy this item on a shop, this will override their value when trading with an NPC. E.g. Buying a boss weapon by trading a boss soul")]
         public SerializedDictionary<Item, int> tradingItemRequirements = new();
 
-        public bool isUserCreatedItem = false;
 
         public string GetName()
         {
@@ -59,5 +58,6 @@ namespace AF
 
             return "";
         }
+
     }
 }

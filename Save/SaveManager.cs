@@ -130,10 +130,15 @@ namespace AF
         {
             SerializedDictionary<string, ItemAmount> keyValuePairs = new();
 
+            List<SerializedUserCreatedItem> userCreatedItems = new();
+
             foreach (var ownedItem in inventoryDatabase.ownedItems)
             {
-                if (ownedItem.Key.isUserCreatedItem)
+                if (ownedItem.Key is Consumable consumable && consumable.isUserCreatedItem)
                 {
+                    SerializedUserCreatedItem userCreatedItem = consumable.ConvertToSerializedUserCreatedItem();
+
+                    userCreatedItems.Add(userCreatedItem);
                     continue;
                 }
 
@@ -145,15 +150,7 @@ namespace AF
                 }
             }
 
-            quickSaveWriter.Write("ownedItems", keyValuePairs);
-
-            SerializedDictionary<string, SerializedUserCreatedItem> serializedUserCreatedItems = new();
-
-            foreach (var userCreatedItem in inventoryDatabase.userCreatedItems)
-            {
-
-
-            }
+            quickSaveWriter.Write("userCreatedItems", userCreatedItems);
 
             quickSaveWriter.Write("ownedItems", keyValuePairs);
         }
@@ -529,6 +526,20 @@ namespace AF
                     }
                 }
             }
+
+
+            quickSaveReader.TryRead("userCreatedItems", out List<SerializedUserCreatedItem> serializedUserCreatedItems);
+
+            foreach (var serializedUserCreatedItem in serializedUserCreatedItems)
+            {
+                Consumable consumable = serializedUserCreatedItem.GenerateConsumable();
+
+                if (consumable != null)
+                {
+                    inventoryDatabase.ownedItems.Add(consumable, new() { amount = 1, chanceToGet = 100, usages = 0 });
+                }
+            }
+
         }
 
         void LoadPickups(QuickSaveReader quickSaveReader)
